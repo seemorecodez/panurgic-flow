@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "1.0",
+  "product": "Panurgic Flow",
+  "requestedModel": "gpt-5.6-sol",
+  "evidence": {
+    "projectName": "Panurgic Flow",
+    "targetTrack": "Developer Tools",
+    "sourceAgent": "Mixed agents",
+    "rawEvidence": "COMMIT: Added structured output, evidence export, and responsive product UI.\nTEST: Build, browser-local generation, Codex forge validation, and render checks pass.\nCODEX: Implemented the product and forged a structured packet with GPT-5.6.\nDECISION: Keep public execution local and run Codex only in a trusted builder environment.\nPATTERN: raw evidence -> local judge packet -> Codex SDK forge -> sealed capsule.",
+    "audience": "Hackathon builders and engineering teams who need a trustworthy story of how AI-assisted software was designed, built, tested, and repeated.",
+    "repoSignals": "A hookless evidence normalizer, portable JSON capsule, browser-generated SHA-256 fingerprint, and tested responsive interface.",
+    "codexNotes": "Codex implemented the product, structured the evidence workflow, and can forge an enhanced packet with GPT-5.6 through the local SDK companion.",
+    "workflowPattern": "evidence intake -> browser-local judge packet -> Codex SDK forge -> claim ledger -> sealed capsule"
+  }
+}

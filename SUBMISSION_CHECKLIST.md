@@ -1,4 +1,4 @@
-# Panurgic Flow — OpenAI Build Week submission checklist
+# Panurgic Flow - OpenAI Build Week submission checklist
 
 Verified against the official OpenAI Build Week rules and live Devpost submission fields on July 18, 2026. The official rules and Devpost page remain the source of truth.
 
@@ -12,14 +12,17 @@ Submission deadline: **July 21, 2026 at 5:00 PM Pacific Time**.
 - [x] README includes setup, sample-data, run, and test instructions.
 - [x] README explains Codex acceleration, human decisions, and GPT-5.6 integration.
 - [x] Developer-tool installation instructions and supported platforms are documented.
-- [x] Deterministic no-key path lets judges test the product locally.
+- [x] Complete browser-local path lets judges test without an account, key, or quota.
+- [x] Trusted Codex SDK companion is pinned to `gpt-5.6-sol` with structured output, read-only sandboxing, denied approvals, and disabled network/web search.
+- [x] No hosted Codex executor, model API route, or runtime credential is exposed.
+- [x] Successful local `gpt-5.6-sol` forge completed through the authenticated Codex SDK session and returned the validated packet shape.
 - [x] MIT license included for a public-repository submission.
 - [x] New work is timestamped during the submission period in commit history.
 - [ ] Publish the source to a judge-accessible repository URL.
   - Public option: keep `LICENSE` and make the repository public.
   - Private option: share it with `testing@devpost.com` and `build-week-event@openai.com`.
 - [ ] Make the hosted demo judge-accessible or provide another no-rebuild sandbox/test path.
-- [ ] Resolve the API project's current `insufficient_quota` response, confirm a successful live GPT-5.6 call, and configure `OPENAI_API_KEY` in the hosted runtime before recording.
+- [ ] Import the validated `codex-sdk · gpt-5.6-sol` packet while recording the demo.
 
 ## Demo video
 
@@ -27,7 +30,8 @@ Submission deadline: **July 21, 2026 at 5:00 PM Pacific Time**.
 - [ ] Include a clear working-product demo.
 - [ ] Include audible narration explaining what Panurgic Flow does.
 - [ ] Explain specifically how Codex accelerated the build and where human decisions were made.
-- [ ] Explain and show what GPT-5.6 does in the product.
+- [ ] Explain and show what GPT-5.6 does in the local Codex companion.
+- [ ] Show that the hosted judge path works without account, key, or quota.
 - [ ] Use only original or authorized media; do not use copyrighted music or unauthorized third-party trademarks.
 - [ ] Upload it as a public YouTube video and verify the link.
 

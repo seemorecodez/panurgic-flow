@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 
 const title = "Panurgic Flow";
 const description =
-  "Turn multi-agent development evidence into grounded claims, judge-ready artifacts, and a sealed proof capsule.";
+  "Turn multi-agent development evidence into grounded claims with a no-key judge path and a trusted local Codex forge powered by GPT-5.6.";
 
 export async function generateMetadata(): Promise<Metadata> {
   const requestHeaders = await headers();

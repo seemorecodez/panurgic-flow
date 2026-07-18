@@ -10,10 +10,13 @@
     "build": "vinext build",
     "start": "vinext start",
     "test": "pnpm run build && node --test tests/rendered-html.test.mjs",
+    "codex:forge": "node scripts/panurgic-forge.mjs",
+    "codex:forge:dry": "node scripts/panurgic-forge.mjs --dry-run examples/forge-input.json",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "db:generate": "drizzle-kit generate"
   },
   "dependencies": {
+    "@openai/codex-sdk": "0.144.6",
     "drizzle-orm": "0.45.2",
     "next": "16.2.6",
     "react": "19.2.6",
