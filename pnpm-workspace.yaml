@@ -2,11 +2,11 @@ minimumReleaseAgeExclude:
   - '@openai/codex-sdk@0.144.6'
   - '@openai/codex@0.144.6-darwin-arm64 || 0.144.6-darwin-x64 || 0.144.6-linux-arm64 || 0.144.6-linux-x64 || 0.144.6-win32-arm64 || 0.144.6-win32-x64 || 0.144.6'
 
-# These pinned packages need their install scripts to provision native build
-# binaries used by the production toolchain. All other dependency scripts stay
-# blocked by pnpm's build-approval policy.
-onlyBuiltDependencies:
-  - esbuild
-  - sharp
-  - unrs-resolver
-  - workerd
+# These exact locked versions need install scripts to provision native build
+# binaries used by the production toolchain. Every unlisted dependency remains
+# blocked by pnpm 11's strict build-approval policy.
+allowBuilds:
+  'esbuild@0.18.20 || 0.25.12 || 0.27.3 || 0.28.1': true
+  'sharp@0.34.5': true
+  'unrs-resolver@1.12.2': true
+  'workerd@1.20260515.1': true
