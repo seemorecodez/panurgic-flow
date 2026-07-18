@@ -10,6 +10,7 @@ Submission deadline: **July 21, 2026 at 5:00 PM Pacific Time**.
 - [x] Single category selected: **Developer Tools**.
 - [x] English project description drafted in `DEVPOST_SUBMISSION.md`.
 - [x] README includes setup, sample-data, run, and test instructions.
+- [x] README commands reproduced from a clean public clone: frozen install, dry forge, lint, production build, and all five tests passed.
 - [x] README explains Codex acceleration, human decisions, and GPT-5.6 integration.
 - [x] Developer-tool installation instructions and supported platforms are documented.
 - [x] Complete browser-local path lets judges test without an account, key, or quota.
