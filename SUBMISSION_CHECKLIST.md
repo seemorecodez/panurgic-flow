@@ -18,10 +18,9 @@ Submission deadline: **July 21, 2026 at 5:00 PM Pacific Time**.
 - [x] Successful local `gpt-5.6-sol` forge completed through the authenticated Codex SDK session and returned the validated packet shape.
 - [x] MIT license included with copyright attribution to GitHub owner `seemorecodez`.
 - [x] New work is timestamped during the submission period in commit history.
-- [ ] Publish the source to a judge-accessible repository URL.
-  - Public option: keep `LICENSE` and make the repository public.
-  - Private option: share it with `testing@devpost.com` and `build-week-event@openai.com`.
-- [ ] Make the hosted demo judge-accessible or provide another no-rebuild sandbox/test path.
+- [x] Public source repository: https://github.com/seemorecodez/panurgic-flow
+- [x] Public hosted demo: https://codex-flight-recorder.seemoreas0-0.chatgpt.site
+- [x] Signed-out HTTP checks return 200 for the repository and demo, with no login screen.
 - [ ] Import the validated `codex-sdk · gpt-5.6-sol` packet while recording the demo.
 
 ## Demo video
@@ -42,8 +41,8 @@ Use the timed script in `DEVPOST_SUBMISSION.md`; it ends before the three-minute
 - [x] Submitter type selected: **Individual**.
 - [x] Country of residence selected: **United States**; entrant must retain responsibility for the remaining personal eligibility attestations.
 - [x] Category: Developer Tools.
-- [ ] Public or properly shared private code-repository URL.
-- [ ] Judge demo URL and any private testing instructions.
+- [x] Public code-repository URL added to the Devpost project.
+- [x] Public judge-demo URL added to the Devpost project; exact testing instructions are drafted in `DEVPOST_SUBMISSION.md`.
 - [ ] `/feedback` Session ID from the primary Codex task where most core functionality was built.
 - [x] Developer-tool installation, supported-platform, and testing text drafted.
 - [x] No team invitations required for an Individual submission.
@@ -51,8 +50,9 @@ Use the timed script in `DEVPOST_SUBMISSION.md`; it ends before the three-minute
 
 ## Final integrity check
 
+- [x] Official requirements, submission fields, key dates, judging criteria, and host announcements rechecked on July 18, 2026.
 - [ ] All claims match the actual code, commits, tests, and demo.
-- [ ] No API keys, tokens, private data, or credentials are committed or shown in the video.
-- [ ] All third-party SDKs, libraries, data, and media are authorized and disclosed where relevant.
-- [ ] Product name is **Panurgic Flow** everywhere.
+- [x] Current files and full Git history scanned with no API keys, tokens, tracked environment files, generated packets, deployment archives, private data, or credentials found; repeat the video check after recording.
+- [x] Repository dependencies and licenses are disclosed; no third-party media is tracked. Reconfirm any video media before upload.
+- [x] Product name is **Panurgic Flow** throughout the app and current documentation; the immutable Devpost slug `astro-flow` is intentionally accepted.
 - [ ] Re-check the official rules and announcements immediately before submission because organizers may update them.
