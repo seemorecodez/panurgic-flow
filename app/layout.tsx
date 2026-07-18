@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { headers } from "next/headers";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -12,15 +13,65 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "Codex Flight Recorder / Skill Forge",
-  description:
-    "Turn Codex-assisted development into a judge-ready proof packet and reusable workflow skill.",
-  icons: {
-    icon: "/favicon.svg",
-    shortcut: "/favicon.svg",
-  },
-};
+const title = "Astro Flow";
+const description =
+  "Turn Codex-assisted development into a judge-ready proof packet and reusable workflow skill.";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const requestHeaders = await headers();
+  const host =
+    requestHeaders.get("x-forwarded-host")?.split(",")[0]?.trim() ||
+    requestHeaders.get("host") ||
+    "codex-flight-recorder.seemoreas0-0.chatgpt.site";
+  const forwardedProtocol = requestHeaders
+    .get("x-forwarded-proto")
+    ?.split(",")[0]
+    ?.trim();
+  const protocol =
+    forwardedProtocol === "http" || forwardedProtocol === "https"
+      ? forwardedProtocol
+      : host.startsWith("localhost")
+        ? "http"
+        : "https";
+
+  let metadataBase: URL;
+  try {
+    metadataBase = new URL(`${protocol}://${host}`);
+  } catch {
+    metadataBase = new URL(
+      "https://codex-flight-recorder.seemoreas0-0.chatgpt.site",
+    );
+  }
+
+  return {
+    metadataBase,
+    title,
+    description,
+    icons: {
+      icon: "/favicon.svg",
+      shortcut: "/favicon.svg",
+    },
+    openGraph: {
+      title,
+      description,
+      type: "website",
+      images: [
+        {
+          url: "/og.png",
+          width: 1744,
+          height: 909,
+          alt: "Astro Flow turns build evidence into proof and a reusable skill.",
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: ["/og.png"],
+    },
+  };
+}
 
 export default function RootLayout({
   children,

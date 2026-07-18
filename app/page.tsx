@@ -31,7 +31,7 @@ type FormState = {
 };
 
 const SAMPLE_FORM: FormState = {
-  projectName: "Codex Flight Recorder + Skill Forge",
+  projectName: "Astro Flow",
   targetTrack: "Developer Tools",
   audience:
     "Hackathon builders and engineering teams who need a trustworthy story of how AI-assisted software was designed, built, tested, and repeated.",
@@ -48,7 +48,7 @@ const LOCAL_SAMPLE: ArtifactResponse = {
   model: "local",
   manifest: {
     thesis:
-      "A development provenance tool that turns messy AI-assisted work into a clear, testable, reusable build story.",
+      "Astro Flow turns messy AI-assisted work into a clear, testable, reusable build story.",
     audience:
       "Builders, reviewers, engineering teams, and hackathon judges who need to understand what changed, why it matters, and how Codex was actually used.",
     codexRole:
@@ -80,9 +80,9 @@ The core loop is:
 2. Generate a build manifest that explains the product, evidence, risks, and next milestones.
 3. Export a judge runbook, demo script, README section, and reusable Codex skill.
 
-The result is a flight recorder for AI-assisted development: not just "AI wrote code," but a clear account of what happened and how another builder can repeat the workflow.`,
+The result is Astro Flow: not just "AI wrote code," but a clear account of what happened and how another builder can repeat the workflow.`,
   demoScript: `0:00 — Show the problem: hackathon projects need proof, setup docs, and a clear Codex/GPT-5.6 story.
-0:25 — Paste repo signals and Codex notes into the recorder.
+0:25 — Paste repo signals and Codex notes into Astro Flow.
 0:55 — Generate the build manifest and show how it maps to judging criteria.
 1:25 — Open the judge runbook and README export.
 1:55 — Open the generated SKILL.md and explain how the workflow becomes reusable.
@@ -102,11 +102,11 @@ The result is a flight recorder for AI-assisted development: not just "AI wrote 
 
 No private services are required for the fallback path.`,
   skillMarkdown: `---
-name: codex-flight-recorder
+name: astro-flow
 description: Use when a builder wants to turn Codex-assisted development evidence into a README section, judge runbook, demo script, and reusable workflow.
 ---
 
-# Codex Flight Recorder
+# Astro Flow
 
 Use this skill to document an AI-assisted build with evidence.
 
@@ -138,6 +138,29 @@ const artifactFileNames: Record<keyof typeof artifactLabels, string> = {
   judgeRunbook: "judge-runbook.md",
   skillMarkdown: "SKILL.md",
 };
+
+const submissionReadiness = [
+  {
+    label: "Working project",
+    status: "Ready",
+    note: "Runnable web app, GPT-5.6 route, deterministic judge path, and downloadable artifacts.",
+  },
+  {
+    label: "Category",
+    status: "Locked",
+    note: "Developer Tools — agentic workflow provenance and reusable Codex skills.",
+  },
+  {
+    label: "Judge documentation",
+    status: "Ready",
+    note: "Setup, sample data, supported platforms, test steps, and Codex/GPT-5.6 evidence are in the repo.",
+  },
+  {
+    label: "Submission handoff",
+    status: "Owner action",
+    note: "Add the public YouTube demo, repository URL, and primary /feedback Session ID before submitting.",
+  },
+];
 
 export default function Home() {
   const [form, setForm] = useState<FormState>(SAMPLE_FORM);
@@ -227,9 +250,9 @@ export default function Home() {
         <div className="orb orb-two" />
 
         <nav className="topbar" aria-label="Product">
-          <div className="brand-mark">CF</div>
-          <span>Codex Flight Recorder / Skill Forge</span>
-          <a href="#generator">Open recorder</a>
+          <div className="brand-mark">AF</div>
+          <span>Astro Flow</span>
+          <a href="#generator">Open the forge</a>
         </nav>
 
         <div className="hero-grid">
@@ -240,10 +263,10 @@ export default function Home() {
               skill.
             </h1>
             <p className="lede">
-              The spicy hybrid: a flight recorder for Codex work that also
-              forges the observed workflow into a portable <code>SKILL.md</code>.
-              It helps builders prove what happened, judges test it quickly, and
-              teams repeat the pattern after the hackathon.
+              Astro Flow records the evidence behind Codex work, then forges the
+              observed workflow into a portable <code>SKILL.md</code>. Builders
+              prove what happened, judges test it quickly, and teams can repeat
+              the pattern after the hackathon.
             </p>
 
             <div className="hero-actions">
@@ -261,7 +284,7 @@ export default function Home() {
               <span />
               <span />
               <span />
-              <p>flight-recorder.run</p>
+              <p>astro-flow.run</p>
             </div>
             <div className="terminal-flow">
               <div>
@@ -291,10 +314,37 @@ export default function Home() {
         ))}
       </section>
 
+      <section className="readiness-shell" aria-labelledby="readiness-heading">
+        <div className="readiness-heading">
+          <div>
+            <p className="eyebrow">Official requirement check</p>
+            <h2 id="readiness-heading">Built for a clean Devpost handoff.</h2>
+          </div>
+          <p>
+            The product and repository cover the technical requirements. The
+            final identity, video, repository-sharing, and submission actions
+            stay with the entrant.
+          </p>
+        </div>
+        <div className="readiness-grid">
+          {submissionReadiness.map((item) => (
+            <article key={item.label}>
+              <div>
+                <p>{item.label}</p>
+                <span className={item.status === "Owner action" ? "needs-action" : ""}>
+                  {item.status}
+                </span>
+              </div>
+              <strong>{item.note}</strong>
+            </article>
+          ))}
+        </div>
+      </section>
+
       <section id="generator" className="workspace-grid">
         <form className="input-panel" onSubmit={generateArtifacts}>
           <div className="panel-heading">
-            <p className="eyebrow">Recorder input</p>
+              <p className="eyebrow">Flow input</p>
             <h2>Feed the build story.</h2>
             <span>
               Keep the sample data for a quick judge path, or replace it with
@@ -371,7 +421,7 @@ export default function Home() {
         <section className="output-panel" aria-live="polite">
           <div className="panel-heading output-heading">
             <div>
-              <p className="eyebrow">Flight packet</p>
+              <p className="eyebrow">Build packet</p>
               <h2>{artifacts.manifest.thesis}</h2>
             </div>
             <span className="source-pill">
