@@ -4,6 +4,9 @@ Panurgic Flow turns multi-agent development evidence into grounded claims, a jud
 
 OpenAI Build Week category: **Developer Tools**
 
+- **Live demo:** [Panurgic Flow](https://codex-flight-recorder.seemoreas0-0.chatgpt.site)
+- **Source:** [seemorecodez/panurgic-flow](https://github.com/seemorecodez/panurgic-flow)
+
 ## What it does
 
 AI-assisted projects often lose the useful story behind the code: what changed, where the human made key decisions, what Codex accelerated, how GPT-5.6 is integrated, and how another person can test the result.
@@ -34,7 +37,7 @@ This follows the Codex security boundary: programmatic Codex execution stays in 
 
 The form opens with realistic sample data. No account or private service is required to test the browser workflow.
 
-1. Open Panurgic Flow.
+1. Open the [public Panurgic Flow demo](https://codex-flight-recorder.seemoreas0-0.chatgpt.site).
 2. Keep the sample mixed-agent evidence or paste your own prefixed lines.
 3. Click **Normalize evidence**, then **Forge judge packet locally**.
 4. Review the manifest and claim-to-source ledger.

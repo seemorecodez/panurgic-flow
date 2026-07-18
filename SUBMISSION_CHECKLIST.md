@@ -16,7 +16,7 @@ Submission deadline: **July 21, 2026 at 5:00 PM Pacific Time**.
 - [x] Trusted Codex SDK companion is pinned to `gpt-5.6-sol` with structured output, read-only sandboxing, denied approvals, and disabled network/web search.
 - [x] No hosted Codex executor, model API route, or runtime credential is exposed.
 - [x] Successful local `gpt-5.6-sol` forge completed through the authenticated Codex SDK session and returned the validated packet shape.
-- [x] MIT license included for a public-repository submission.
+- [x] MIT license included with copyright attribution to GitHub owner `seemorecodez`.
 - [x] New work is timestamped during the submission period in commit history.
 - [ ] Publish the source to a judge-accessible repository URL.
   - Public option: keep `LICENSE` and make the repository public.
@@ -39,14 +39,14 @@ Use the timed script in `DEVPOST_SUBMISSION.md`; it ends before the three-minute
 
 ## Required Devpost fields
 
-- [ ] Submitter type: Individual, Team of Individuals, or Organization.
-- [ ] Country of residence and entrant eligibility confirmed against the official rules.
+- [x] Submitter type selected: **Individual**.
+- [x] Country of residence selected: **United States**; entrant must retain responsibility for the remaining personal eligibility attestations.
 - [x] Category: Developer Tools.
 - [ ] Public or properly shared private code-repository URL.
 - [ ] Judge demo URL and any private testing instructions.
 - [ ] `/feedback` Session ID from the primary Codex task where most core functionality was built.
 - [x] Developer-tool installation, supported-platform, and testing text drafted.
-- [ ] Add all team members and confirm invitations, if entering as a team.
+- [x] No team invitations required for an Individual submission.
 - [ ] Submit the project; verify it is **Submitted**, not saved as Draft.
 
 ## Final integrity check

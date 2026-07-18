@@ -1,5 +1,7 @@
 # Panurgic Flow - Devpost submission draft
 
+> Entrant gate: rewrite the project-description section in your own voice before pasting it into Devpost. Preserve the verified technical facts, but do not submit this AI-assisted draft as-is.
+
 ## Tagline
 
 Turn Codex build evidence into a judge-ready proof packet and a reusable workflow skill.
@@ -73,7 +75,17 @@ Explain that Codex built the interface and forge, researched competitor complain
 
 ## Final links to add
 
-- Live demo: add judge-accessible URL
-- Code repository: add public URL or properly shared private URL
-- Public YouTube demo: add URL
-- Primary `/feedback` Session ID: add to the required Devpost field
+- Live demo: https://codex-flight-recorder.seemoreas0-0.chatgpt.site
+- Code repository: https://github.com/seemorecodez/panurgic-flow
+- Public or Unlisted YouTube demo: **OWNER ACTION — add URL**
+- Primary `/feedback` Session ID: **OWNER ACTION — run `/feedback` in the primary build task and add the returned ID**
+
+## Exact Devpost field answers
+
+- **Submitter Type:** Individual
+- **Country of Residence:** United States
+- **Category:** Developer Tools
+- **Repository URL:** https://github.com/seemorecodez/panurgic-flow
+- **Project/test URL and judge instructions:** Public demo: https://codex-flight-recorder.seemoreas0-0.chatgpt.site. No login, API key, or model quota is required. Keep the sample evidence, click **Normalize evidence**, click **Forge judge packet locally**, inspect the manifest and claim-to-source ledger, then download an artifact and seal the evidence capsule. The optional direct Codex path is documented in the repository README.
+- **Primary `/feedback` Session ID:** **OWNER ACTION — paste the value returned by `/feedback` in the current primary build task. Do not substitute an SDK thread ID.**
+- **Developer-tool installation, platforms, and testing:** Requires Node.js 22.13+ and `pnpm`; local development supports Windows, macOS, and Linux, while the hosted product supports current desktop and mobile browsers. Run `pnpm install` and `pnpm dev`. Validate with `pnpm codex:forge:dry`, `pnpm lint`, and `pnpm test`. Judges can use the complete public browser path without rebuilding or signing in. The optional model-assisted path uses an authenticated Codex session and `pnpm codex:forge -- examples/forge-input.json`.
