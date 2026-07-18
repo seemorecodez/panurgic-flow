@@ -24,21 +24,36 @@ type ArtifactResponse = {
 type FormState = {
   projectName: string;
   targetTrack: string;
+  sourceAgent: string;
+  rawEvidence: string;
   audience: string;
   repoSignals: string;
   codexNotes: string;
   workflowPattern: string;
 };
 
+type ClaimLedgerEntry = {
+  claim: string;
+  sourceLabel: string;
+  matchedTerms: string[];
+  status: "Grounded" | "Review";
+};
+
 const SAMPLE_FORM: FormState = {
-  projectName: "Astro Flow",
+  projectName: "Panurgic Flow",
   targetTrack: "Developer Tools",
+  sourceAgent: "Mixed agents",
+  rawEvidence: `COMMIT: Added structured output, evidence export, and responsive product UI.
+TEST: Build, malformed-request, compliance, and render checks pass.
+CODEX: Implemented the UI and API, debugged the environment, and validated deployment.
+DECISION: Keep fallback behavior explicit and every generated claim grounded.
+PATTERN: raw evidence -> normalized fields -> build packet -> reusable skill.`,
   audience:
     "Hackathon builders and engineering teams who need a trustworthy story of how AI-assisted software was designed, built, tested, and repeated.",
   repoSignals:
-    "Commits: initial scaffold, API route, sample data, export buttons, build fixes. Tests: local build, route fallback, accessibility pass. Files touched: app/page.tsx, app/api/generate/route.ts, README.md.",
+    "Evidence: normalizes pasted evidence from multiple coding agents without an IDE extension or git hook. Export: portable evidence capsule with browser-generated SHA-256 fingerprint. Tests: local build, route fallback, accessibility pass.",
   codexNotes:
-    "Codex helped inspect the empty workspace, scaffold the site, implement the UI/API, debug Windows package-manager issues, and convert the build process into reusable submission artifacts.",
+    "Generated claim mapping selects the strongest supplied source and flags weak matches for review. Codex implemented the UI/API, debugged setup, and validated deployment.",
   workflowPattern:
     "Pattern: evidence intake -> rubric-aware build manifest -> judge runbook -> README proof -> reusable Codex SKILL.md for future projects.",
 };
@@ -48,7 +63,7 @@ const LOCAL_SAMPLE: ArtifactResponse = {
   model: "local",
   manifest: {
     thesis:
-      "Astro Flow turns messy AI-assisted work into a clear, testable, reusable build story.",
+      "Panurgic Flow turns scattered multi-agent work into grounded claims and portable, tamper-evident proof.",
     audience:
       "Builders, reviewers, engineering teams, and hackathon judges who need to understand what changed, why it matters, and how Codex was actually used.",
     codexRole:
@@ -56,9 +71,9 @@ const LOCAL_SAMPLE: ArtifactResponse = {
     gptRole:
       "GPT-5.6 synthesizes repo signals, Codex notes, and workflow patterns into structured documentation and a reusable skill package.",
     evidence: [
-      "Exports a rubric-aware build manifest instead of a generic project summary.",
-      "Produces judge-facing run instructions and a concise demo script.",
-      "Generates a reusable SKILL.md so the same workflow can be repeated in future Codex projects.",
+      "Normalizes pasted evidence from multiple coding agents without requiring an IDE extension or git hook.",
+      "Maps each generated claim to the strongest supplied source and flags weak matches for review.",
+      "Exports a portable evidence capsule with a browser-generated SHA-256 fingerprint.",
     ],
     risks: [
       "Generated documentation must stay grounded in real repo evidence.",
@@ -80,9 +95,9 @@ The core loop is:
 2. Generate a build manifest that explains the product, evidence, risks, and next milestones.
 3. Export a judge runbook, demo script, README section, and reusable Codex skill.
 
-The result is Astro Flow: not just "AI wrote code," but a clear account of what happened and how another builder can repeat the workflow.`,
+The result is Panurgic Flow: not just "AI wrote code," but a clear account of what happened and how another builder can repeat the workflow.`,
   demoScript: `0:00 — Show the problem: hackathon projects need proof, setup docs, and a clear Codex/GPT-5.6 story.
-0:25 — Paste repo signals and Codex notes into Astro Flow.
+0:25 — Paste multi-agent evidence into Panurgic Flow.
 0:55 — Generate the build manifest and show how it maps to judging criteria.
 1:25 — Open the judge runbook and README export.
 1:55 — Open the generated SKILL.md and explain how the workflow becomes reusable.
@@ -102,11 +117,11 @@ The result is Astro Flow: not just "AI wrote code," but a clear account of what 
 
 No private services are required for the fallback path.`,
   skillMarkdown: `---
-name: astro-flow
+name: panurgic-flow
 description: Use when a builder wants to turn Codex-assisted development evidence into a README section, judge runbook, demo script, and reusable workflow.
 ---
 
-# Astro Flow
+# Panurgic Flow
 
 Use this skill to document an AI-assisted build with evidence.
 
@@ -162,6 +177,92 @@ const submissionReadiness = [
   },
 ];
 
+const wowFactors = [
+  {
+    number: "01",
+    title: "Hookless multi-agent intake",
+    complaint:
+      "Observed complaint: capture can break across IDE storage changes and remote workspaces, while workflow hooks can collide with existing git setup.",
+    answer:
+      "Paste evidence from Codex, Cursor, Claude Code, Copilot, or a mixed session and normalize it locally—no extension or git hook required.",
+  },
+  {
+    number: "02",
+    title: "Claim-to-source ledger",
+    complaint:
+      "Observed complaint: transcript and trace exports can omit tool activity or fail silently, leaving reviewers unsure what supports a claim.",
+    answer:
+      "Every generated evidence claim is matched to the strongest supplied source; weak matches are visibly flagged for human review.",
+  },
+  {
+    number: "03",
+    title: "Tamper-evident evidence capsule",
+    complaint:
+      "Observed complaint: large trace exports can be slow and provide little completion visibility.",
+    answer:
+      "Seal the complete packet into portable JSON with a local SHA-256 fingerprint in one click.",
+  },
+];
+
+const STOP_WORDS = new Set([
+  "and",
+  "the",
+  "for",
+  "from",
+  "into",
+  "that",
+  "this",
+  "with",
+  "using",
+  "each",
+  "every",
+  "without",
+  "your",
+  "their",
+  "then",
+  "than",
+]);
+
+function tokenize(value: string) {
+  return Array.from(
+    new Set(
+      (value.toLowerCase().match(/[a-z0-9]+/g) ?? []).filter(
+        (term) => term.length > 2 && !STOP_WORDS.has(term),
+      ),
+    ),
+  );
+}
+
+function buildClaimLedger(
+  claims: string[],
+  form: FormState,
+): ClaimLedgerEntry[] {
+  const sources = [
+    { label: "Repository signals", value: form.repoSignals },
+    { label: `${form.sourceAgent} notes`, value: form.codexNotes },
+    { label: "Workflow pattern", value: form.workflowPattern },
+    { label: "Audience brief", value: form.audience },
+  ].map((source) => ({ ...source, terms: new Set(tokenize(source.value)) }));
+
+  return claims.map((claim) => {
+    const claimTerms = tokenize(claim);
+    const ranked = sources
+      .map((source) => ({
+        source,
+        matches: claimTerms.filter((term) => source.terms.has(term)),
+      }))
+      .sort((left, right) => right.matches.length - left.matches.length);
+    const best = ranked[0];
+
+    return {
+      claim,
+      sourceLabel: best?.matches.length ? best.source.label : "No direct source match",
+      matchedTerms: best?.matches.slice(0, 5) ?? [],
+      status: (best?.matches.length ?? 0) >= 2 ? "Grounded" : "Review",
+    };
+  });
+}
+
 export default function Home() {
   const [form, setForm] = useState<FormState>(SAMPLE_FORM);
   const [artifacts, setArtifacts] = useState<ArtifactResponse>(LOCAL_SAMPLE);
@@ -169,6 +270,13 @@ export default function Home() {
     useState<keyof typeof artifactLabels>("readmeSection");
   const [isGenerating, setIsGenerating] = useState(false);
   const [copied, setCopied] = useState("");
+  const [importStatus, setImportStatus] = useState("");
+  const [capsuleHash, setCapsuleHash] = useState("");
+
+  const claimLedger = useMemo(
+    () => buildClaimLedger(artifacts.manifest.evidence, form),
+    [artifacts.manifest.evidence, form],
+  );
 
   const manifestScore = useMemo(
     () => [
@@ -198,6 +306,52 @@ export default function Home() {
 
   function updateField(field: keyof FormState, value: string) {
     setForm((current) => ({ ...current, [field]: value }));
+  }
+
+  function normalizeEvidence() {
+    const groups = {
+      repoSignals: [] as string[],
+      codexNotes: [] as string[],
+      workflowPattern: [] as string[],
+    };
+
+    for (const line of form.rawEvidence.split(/\r?\n/)) {
+      const match = line
+        .trim()
+        .match(/^(COMMIT|TEST|CODEX|DECISION|PATTERN):\s*(.+)$/i);
+      if (!match) continue;
+      const prefix = match[1] ?? "";
+      const value = match[2] ?? "";
+      if (/^(COMMIT|TEST)$/i.test(prefix)) {
+        groups.repoSignals.push(`${prefix.toUpperCase()}: ${value}`);
+      }
+      if (/^(CODEX|DECISION)$/i.test(prefix)) {
+        groups.codexNotes.push(`${prefix.toUpperCase()}: ${value}`);
+      }
+      if (/^PATTERN$/i.test(prefix)) groups.workflowPattern.push(value);
+    }
+
+    const recognized = Object.values(groups).reduce(
+      (total, entries) => total + entries.length,
+      0,
+    );
+    if (!recognized) {
+      setImportStatus(
+        "No recognized lines. Start lines with COMMIT, TEST, CODEX, DECISION, or PATTERN.",
+      );
+      return;
+    }
+
+    setForm((current) => ({
+      ...current,
+      repoSignals: groups.repoSignals.join("\n") || current.repoSignals,
+      codexNotes: groups.codexNotes.join("\n") || current.codexNotes,
+      workflowPattern:
+        groups.workflowPattern.join("\n") || current.workflowPattern,
+    }));
+    setImportStatus(
+      `Normalized ${recognized} evidence lines from ${form.sourceAgent}.`,
+    );
   }
 
   async function generateArtifacts(event: FormEvent<HTMLFormElement>) {
@@ -239,8 +393,46 @@ export default function Home() {
     const link = document.createElement("a");
     link.href = url;
     link.download = artifactFileNames[activeArtifact];
+    document.body.append(link);
     link.click();
-    URL.revokeObjectURL(url);
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  async function downloadCapsule() {
+    const baseCapsule = {
+      schemaVersion: "1.0",
+      product: "Panurgic Flow",
+      createdAt: new Date().toISOString(),
+      sourceAgent: form.sourceAgent,
+      input: form,
+      output: artifacts,
+      claimLedger,
+    };
+    const unsignedJson = JSON.stringify(baseCapsule, null, 2);
+    const digest = await crypto.subtle.digest(
+      "SHA-256",
+      new TextEncoder().encode(unsignedJson),
+    );
+    const fingerprint = Array.from(new Uint8Array(digest))
+      .map((byte) => byte.toString(16).padStart(2, "0"))
+      .join("");
+    const sealedCapsule = {
+      ...baseCapsule,
+      fingerprint: { algorithm: "SHA-256", value: fingerprint },
+    };
+    const blob = new Blob([JSON.stringify(sealedCapsule, null, 2)], {
+      type: "application/json;charset=utf-8",
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "panurgic-flow-evidence-capsule.json";
+    document.body.append(link);
+    link.click();
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+    setCapsuleHash(fingerprint);
   }
 
   return (
@@ -250,8 +442,8 @@ export default function Home() {
         <div className="orb orb-two" />
 
         <nav className="topbar" aria-label="Product">
-          <div className="brand-mark">AF</div>
-          <span>Astro Flow</span>
+          <div className="brand-mark">PF</div>
+          <span>Panurgic Flow</span>
           <a href="#generator">Open the forge</a>
         </nav>
 
@@ -263,10 +455,10 @@ export default function Home() {
               skill.
             </h1>
             <p className="lede">
-              Astro Flow records the evidence behind Codex work, then forges the
-              observed workflow into a portable <code>SKILL.md</code>. Builders
-              prove what happened, judges test it quickly, and teams can repeat
-              the pattern after the hackathon.
+              Panurgic Flow turns multi-agent evidence into grounded claims,
+              judge-ready artifacts, and a sealed proof capsule. Builders prove
+              what happened without installing capture hooks, and teams can
+              repeat the workflow after the hackathon.
             </p>
 
             <div className="hero-actions">
@@ -284,20 +476,20 @@ export default function Home() {
               <span />
               <span />
               <span />
-              <p>astro-flow.run</p>
+              <p>panurgic-flow.run</p>
             </div>
             <div className="terminal-flow">
               <div>
                 <small>01 · Capture</small>
-                <strong>Repo signals + Codex notes</strong>
+                <strong>Hookless multi-agent evidence</strong>
               </div>
               <div>
                 <small>02 · Synthesize</small>
-                <strong>GPT-5.6 build manifest</strong>
+                <strong>GPT-5.6 manifest + claim ledger</strong>
               </div>
               <div>
                 <small>03 · Export</small>
-                <strong>README · Runbook · Demo · Skill</strong>
+                <strong>Artifacts + sealed evidence capsule</strong>
               </div>
             </div>
           </div>
@@ -312,6 +504,25 @@ export default function Home() {
             <span>{item.note}</span>
           </article>
         ))}
+      </section>
+
+      <section className="wow-shell" aria-labelledby="wow-heading">
+        <div className="wow-heading">
+          <p className="eyebrow">Complaint-driven differentiation</p>
+          <h2 id="wow-heading">
+            Three gaps competitors exposed. Three working answers.
+          </h2>
+        </div>
+        <div className="wow-grid">
+          {wowFactors.map((factor) => (
+            <article key={factor.number}>
+              <span>{factor.number}</span>
+              <h3>{factor.title}</h3>
+              <p>{factor.complaint}</p>
+              <strong>{factor.answer}</strong>
+            </article>
+          ))}
+        </div>
       </section>
 
       <section className="readiness-shell" aria-labelledby="readiness-heading">
@@ -350,6 +561,49 @@ export default function Home() {
               Keep the sample data for a quick judge path, or replace it with
               evidence from the current repo.
             </span>
+          </div>
+
+          <div className="intake-box">
+            <div className="intake-heading">
+              <div>
+                <p className="eyebrow">Wow factor 01</p>
+                <h3>Hookless multi-agent intake</h3>
+              </div>
+              <span>No extension. No git hook.</span>
+            </div>
+            <label>
+              Evidence source
+              <select
+                value={form.sourceAgent}
+                onChange={(event) =>
+                  updateField("sourceAgent", event.target.value)
+                }
+              >
+                <option>Mixed agents</option>
+                <option>Codex</option>
+                <option>Cursor</option>
+                <option>Claude Code</option>
+                <option>GitHub Copilot</option>
+              </select>
+            </label>
+            <label>
+              Raw evidence
+              <textarea
+                value={form.rawEvidence}
+                onChange={(event) =>
+                  updateField("rawEvidence", event.target.value)
+                }
+                rows={8}
+              />
+            </label>
+            <button
+              className="normalize-button"
+              type="button"
+              onClick={normalizeEvidence}
+            >
+              Normalize evidence
+            </button>
+            {importStatus ? <p className="status-note">{importStatus}</p> : null}
           </div>
 
           <label>
@@ -476,6 +730,38 @@ export default function Home() {
             </div>
           </div>
 
+          <section className="ledger-shell" aria-labelledby="ledger-heading">
+            <div className="ledger-heading">
+              <div>
+                <p className="eyebrow">Wow factor 02</p>
+                <h3 id="ledger-heading">Claim-to-source ledger</h3>
+              </div>
+              <span>Deterministic token matching</span>
+            </div>
+            <div className="ledger-grid">
+              {claimLedger.map((entry) => (
+                <article key={entry.claim}>
+                  <div>
+                    <span
+                      className={
+                        entry.status === "Grounded" ? "grounded" : "review"
+                      }
+                    >
+                      {entry.status}
+                    </span>
+                    <small>{entry.sourceLabel}</small>
+                  </div>
+                  <p>{entry.claim}</p>
+                  <strong>
+                    {entry.matchedTerms.length
+                      ? `Matched: ${entry.matchedTerms.join(", ")}`
+                      : "No exact supporting terms found—verify before submission."}
+                  </strong>
+                </article>
+              ))}
+            </div>
+          </section>
+
           <div className="artifact-tabs" role="tablist" aria-label="Artifacts">
             {(Object.keys(artifactLabels) as Array<keyof typeof artifactLabels>).map(
               (key) => (
@@ -498,8 +784,22 @@ export default function Home() {
             <button type="button" onClick={downloadSelected}>
               Download .md
             </button>
+            <button
+              className="capsule-button"
+              type="button"
+              onClick={downloadCapsule}
+            >
+              Seal evidence capsule
+            </button>
             {copied ? <span>Copied {copied}</span> : null}
           </div>
+
+          {capsuleHash ? (
+            <p className="capsule-proof">
+              <span>Wow factor 03 · sealed</span>
+              SHA-256 {capsuleHash.slice(0, 16)}…{capsuleHash.slice(-12)}
+            </p>
+          ) : null}
 
           <pre className="artifact-preview">{artifacts[activeArtifact]}</pre>
         </section>

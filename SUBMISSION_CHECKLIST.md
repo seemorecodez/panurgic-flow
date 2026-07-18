@@ -1,4 +1,4 @@
-# Astro Flow — OpenAI Build Week submission checklist
+# Panurgic Flow — OpenAI Build Week submission checklist
 
 Verified against the official OpenAI Build Week rules and live Devpost submission fields on July 18, 2026. The official rules and Devpost page remain the source of truth.
 
@@ -25,7 +25,7 @@ Submission deadline: **July 21, 2026 at 5:00 PM Pacific Time**.
 
 - [ ] Record a video under three minutes.
 - [ ] Include a clear working-product demo.
-- [ ] Include audible narration explaining what Astro Flow does.
+- [ ] Include audible narration explaining what Panurgic Flow does.
 - [ ] Explain specifically how Codex accelerated the build and where human decisions were made.
 - [ ] Explain and show what GPT-5.6 does in the product.
 - [ ] Use only original or authorized media; do not use copyrighted music or unauthorized third-party trademarks.
@@ -50,5 +50,5 @@ Use the timed script in `DEVPOST_SUBMISSION.md`; it ends before the three-minute
 - [ ] All claims match the actual code, commits, tests, and demo.
 - [ ] No API keys, tokens, private data, or credentials are committed or shown in the video.
 - [ ] All third-party SDKs, libraries, data, and media are authorized and disclosed where relevant.
-- [ ] Product name is **Astro Flow** everywhere.
+- [ ] Product name is **Panurgic Flow** everywhere.
 - [ ] Re-check the official rules and announcements immediately before submission because organizers may update them.

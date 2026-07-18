@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const title = "Astro Flow";
+const title = "Panurgic Flow";
 const description =
-  "Turn Codex-assisted development into a judge-ready proof packet and reusable workflow skill.";
+  "Turn multi-agent development evidence into grounded claims, judge-ready artifacts, and a sealed proof capsule.";
 
 export async function generateMetadata(): Promise<Metadata> {
   const requestHeaders = await headers();
@@ -60,7 +60,7 @@ export async function generateMetadata(): Promise<Metadata> {
           url: "/og.png",
           width: 1744,
           height: 909,
-          alt: "Astro Flow turns build evidence into proof and a reusable skill.",
+          alt: "Panurgic Flow turns multi-agent evidence into grounded, sealed proof.",
         },
       ],
     },

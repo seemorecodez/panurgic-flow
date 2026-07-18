@@ -1,4 +1,4 @@
-# Astro Flow — Devpost submission draft
+# Panurgic Flow — Devpost submission draft
 
 ## Tagline
 
@@ -10,13 +10,13 @@ Developer Tools
 
 ## Project description
 
-Astro Flow is a provenance and workflow-forging tool for AI-assisted development. Builders paste repository signals, Codex collaboration notes, and the repeatable pattern behind a project. GPT-5.6 synthesizes that evidence into a build manifest, README proof section, judge runbook, under-three-minute demo script, and reusable Codex `SKILL.md`.
+Panurgic Flow is a provenance and workflow-forging tool for multi-agent development. Builders paste evidence from Codex, Cursor, Claude Code, GitHub Copilot, or mixed sessions. GPT-5.6 synthesizes that evidence into a build manifest, README proof section, judge runbook, under-three-minute demo script, and reusable Codex `SKILL.md`.
 
-The problem is simple: AI-assisted projects often ship without a trustworthy account of what changed, what the human decided, what Codex accelerated, and how someone else can test or repeat the work. Astro Flow makes that story concrete and exportable.
+The problem is simple: AI-assisted projects often ship without a trustworthy account of what changed, what the human decided, what each agent accelerated, and how someone else can test or repeat the work. Panurgic Flow makes that story concrete, source-linked, and portable.
 
-The app is a working web product with sample evidence, a GPT-5.6 Responses API route, transparent model/fallback labeling, copy and download interactions, responsive design, and a deterministic judge path when live API access is unavailable.
+The app is a working web product with hookless multi-agent evidence intake, a deterministic claim-to-source ledger, a SHA-256-sealed JSON evidence capsule, a GPT-5.6 Responses API route, transparent model/fallback labeling, responsive design, and a deterministic judge path when live API access is unavailable.
 
-Codex served as the primary implementation partner across workspace setup, interface and API development, debugging, test creation, compliance review, documentation, and deployment. The human selected the product concept, chose the Developer Tools audience, named Astro Flow, and made the core design decisions around evidence grounding, transparent fallback behavior, and judge usability.
+Codex served as the primary implementation partner across workspace setup, interface and API development, competitor research, debugging, test creation, compliance review, documentation, and deployment. The human selected the product concept, chose the Developer Tools audience, named Panurgic Flow, and made the core design decisions around evidence grounding, transparent fallback behavior, and judge usability.
 
 GPT-5.6 is the product's synthesis engine. It converts noisy project evidence into structured, reviewer-facing artifacts and a portable workflow skill. This is a meaningful product function, not decorative text generation.
 
@@ -26,11 +26,11 @@ Supported platforms: current desktop/mobile browsers; local development on Windo
 
 Judge path:
 
-1. Open the hosted Astro Flow demo, or install and run the repository with `pnpm install` and `pnpm dev`.
+1. Open the hosted Panurgic Flow demo, or install and run the repository with `pnpm install` and `pnpm dev`.
 2. Keep the preloaded sample data.
 3. Click **Generate build packet**.
-4. Verify the build manifest and all four Markdown exports.
-5. Copy or download an artifact.
+4. Verify the build manifest, claim ledger, and all four Markdown exports.
+5. Copy or download an artifact, then seal the JSON evidence capsule.
 
 No account is required for the deterministic test path. A personal OpenAI API key enables live GPT-5.6 generation.
 
@@ -40,7 +40,7 @@ No account is required for the deterministic test path. A personal OpenAI API ke
 AI-assisted projects often lose the build story. Judges and teammates see the result, but not what changed, what Codex accelerated, where the human decided, or how the workflow can be repeated.
 
 **0:18–0:36 — Product**  
-This is Astro Flow, a Developer Tools project that turns Codex build evidence into a judge-ready proof packet and a reusable workflow skill.
+This is Panurgic Flow, a Developer Tools project that turns multi-agent build evidence into grounded claims, a judge-ready proof packet, and a reusable workflow skill.
 
 **0:36–1:02 — Input**  
 Show the preloaded project, audience, repository signals, Codex and GPT-5.6 notes, and workflow pattern. Explain that every generated claim must stay grounded in this evidence.
@@ -52,10 +52,10 @@ Click **Generate build packet**. Explain that the server uses the OpenAI Respons
 Open README proof, demo script, judge runbook, and `SKILL.md`. Copy one artifact and download another to prove the product is more than a static writeup.
 
 **1:55–2:22 — Codex workflow**  
-Explain that Codex built the UI and API route, debugged the local environment, created tests, performed the rules-compliance pass, and deployed the site. Name the human decisions: the hybrid concept, Astro Flow name, evidence grounding, and transparent fallback.
+Explain that Codex built the UI and API route, researched competitor complaints, debugged the local environment, created tests, performed the rules-compliance pass, and deployed the site. Name the human decisions: the hybrid concept, Panurgic Flow name, evidence grounding, and transparent fallback.
 
 **2:22–2:45 — Impact and novelty**  
-Astro Flow combines provenance with reuse. It helps teams ship quickly without losing accountability, then turns a successful build pattern into a skill the next Codex task can follow.
+Panurgic Flow combines provenance with reuse. Its hookless intake avoids capture lock-in, its claim ledger exposes weak support, and its sealed capsule makes the complete proof packet portable. It then turns a successful build pattern into a skill the next Codex task can follow.
 
 ## Final links to add
 
