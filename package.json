@@ -1,6 +1,6 @@
 {
   "name": "panurgic-flow",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "engines": {
     "node": ">=22.13.0"
@@ -9,15 +9,16 @@
     "dev": "vinext dev",
     "build": "vinext build",
     "start": "vinext start",
-    "test": "pnpm run build && node --test tests/rendered-html.test.mjs",
+    "test": "pnpm run test:unit && pnpm run build && node --test tests/rendered-html.test.mjs",
     "codex:forge": "node scripts/panurgic-forge.mjs",
     "codex:forge:dry": "node scripts/panurgic-forge.mjs --dry-run examples/forge-input.json",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
-    "db:generate": "drizzle-kit generate"
+    "security:scan": "node scripts/scan-secrets.mjs",
+    "test:unit": "node --test tests/panurgic-core.test.mjs tests/panurgic-storage.test.mjs",
+    "test:smoke": "node tests/live-smoke.mjs"
   },
   "dependencies": {
-    "@openai/codex-sdk": "0.144.6",
-    "drizzle-orm": "0.45.2",
+    "@openai/codex-sdk": "0.144.5",
     "next": "16.2.6",
     "react": "19.2.6",
     "react-dom": "19.2.6"
@@ -30,9 +31,10 @@
     "@types/react-dom": "19.2.3",
     "@vitejs/plugin-react": "6.0.2",
     "@vitejs/plugin-rsc": "0.5.26",
-    "drizzle-kit": "0.31.10",
+    "axe-core": "4.10.3",
     "eslint": "9.39.4",
     "eslint-config-next": "16.2.6",
+    "jsdom": "26.1.0",
     "react-server-dom-webpack": "19.2.6",
     "tailwindcss": "4.2.1",
     "typescript": "5.9.3",

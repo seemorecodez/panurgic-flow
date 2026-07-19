@@ -1,170 +1,160 @@
 import assert from "node:assert/strict";
 import { execFile } from "node:child_process";
-import { access, readFile, readdir } from "node:fs/promises";
+import { access, readFile, readdir, stat } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
+import { gzipSync } from "node:zlib";
 import test from "node:test";
+import axe from "axe-core";
+import { JSDOM } from "jsdom";
 
 const execFileAsync = promisify(execFile);
 const templateRoot = new URL("../", import.meta.url);
 const templatePath = fileURLToPath(templateRoot);
-const previewRoot = new URL("../app/_sites-preview/", import.meta.url);
 
 async function fetchApp(pathname = "/", init = {}) {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
-  workerUrl.searchParams.set("test", `${process.pid}-${Date.now()}`);
+  workerUrl.searchParams.set("test", `${process.pid}-${Date.now()}-${Math.random()}`);
   const { default: worker } = await import(workerUrl.href);
-
   return worker.fetch(
-    new Request(`http://localhost${pathname}`, init),
-    {
-      ASSETS: {
-        fetch: async () => new Response("Not found", { status: 404 }),
-      },
-    },
-    {
-      waitUntil() {},
-      passThroughOnException() {},
-    },
+    new Request(`https://localhost${pathname}`, init),
+    { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } },
+    { waitUntil() {}, passThroughOnException() {} },
   );
 }
 
-test("server-renders the Codex-native product shell", async () => {
-  const response = await fetchApp("/", {
-    headers: { accept: "text/html" },
-  });
+test("server-renders the production product and public routes", async () => {
+  const response = await fetchApp("/", { headers: { accept: "text/html" } });
   assert.equal(response.status, 200);
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
-
   const html = await response.text();
   assert.match(html, /<title>Panurgic Flow<\/title>/i);
   assert.match(html, /Turn AI-assisted work into evidence you can verify/i);
-  assert.match(html, /Build evidence packet/i);
-  assert.match(html, /Direct Codex companion/i);
-  assert.match(html, /Download Codex request/i);
-  assert.match(html, /Import Codex packet/i);
-  assert.match(html, /Hookless multi-agent intake/i);
-  assert.match(html, /Claim-to-source ledger/i);
-  assert.match(html, /Seal evidence capsule/i);
+  assert.match(html, /Start a local project/i);
+  assert.match(html, /Device-local history/i);
+  assert.match(html, /Capture/);
+  assert.match(html, /Review/);
+  assert.match(html, /Export/);
+  assert.match(html, /Try the sample/i);
   assert.match(html, /Local by default: nothing is uploaded/i);
   assert.doesNotMatch(
     html,
-    /OpenAI Build Week|Devpost|Wow factor|Owner action|See why it scores|Official requirement check|Forge judge packet|Judge runbook|judge-ready/i,
+    /OpenAI Build Week|Devpost|Wow factor|Owner action|See why it scores|Official requirement check|Forge judge packet|Judge runbook|judge-ready|product roadmap/i,
   );
-  assert.doesNotMatch(html, /Your site is taking shape/i);
+
+  const routes = new Map([
+    ["/docs", /A portable evidence workflow/i],
+    ["/privacy", /stays on your device/i],
+    ["/security", /inspectable trust boundary/i],
+    ["/robots.txt", /sitemap/i],
+    ["/sitemap.xml", /\/security/i],
+  ]);
+  for (const [route, expected] of routes) {
+    const routeResponse = await fetchApp(route);
+    assert.equal(routeResponse.status, 200, route);
+    assert.match(await routeResponse.text(), expected, route);
+  }
 });
 
-test("does not expose the retired model API route", async () => {
-  const response = await fetchApp("/api/generate", {
+test("applies production security headers and keeps the retired API unavailable", async () => {
+  const response = await fetchApp("/");
+  assert.equal(response.headers.get("x-content-type-options"), "nosniff");
+  assert.equal(response.headers.get("x-frame-options"), "DENY");
+  assert.equal(response.headers.get("referrer-policy"), "no-referrer");
+  assert.match(response.headers.get("permissions-policy") ?? "", /camera=\(\)/);
+  assert.match(response.headers.get("content-security-policy") ?? "", /frame-ancestors 'none'/);
+  assert.match(response.headers.get("strict-transport-security") ?? "", /max-age=31536000/);
+  const api = await fetchApp("/api/generate", {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: "{}",
   });
-
-  assert.equal(response.status, 404);
+  assert.equal(api.status, 404);
 });
 
-test("Codex forge dry-run validates the bundled request without a model call", async () => {
-  const { stdout, stderr } = await execFileAsync(
-    process.execPath,
-    [
-      fileURLToPath(new URL("../scripts/panurgic-forge.mjs", import.meta.url)),
-      "--dry-run",
-      fileURLToPath(new URL("../examples/forge-input.json", import.meta.url)),
-    ],
-    { cwd: templatePath },
+test("server-rendered shell has no serious or critical axe violations", async () => {
+  const html = await (await fetchApp("/")).text();
+  const dom = new JSDOM(html, { runScripts: "outside-only", url: "https://localhost/" });
+  dom.window.eval(axe.source);
+  const report = await dom.window.axe.run(dom.window.document, {
+    rules: { "color-contrast": { enabled: false } },
+  });
+  const severe = report.violations.filter((violation) =>
+    violation.impact === "serious" || violation.impact === "critical",
   );
+  assert.equal(
+    severe.length,
+    0,
+    severe.map(({ id, impact, help }) => `${id} (${impact}): ${help}`).join("\n"),
+  );
+});
 
-  assert.equal(stderr, "");
-  assert.match(stdout, /Validated .*forge-input\.json for gpt-5\.6-sol/i);
-
+test("Codex CLI exposes help, version, validation, and secure dry-run behavior", async () => {
+  const script = fileURLToPath(new URL("../scripts/panurgic-forge.mjs", import.meta.url));
+  const example = fileURLToPath(new URL("../examples/forge-input.json", import.meta.url));
+  const help = await execFileAsync(process.execPath, [script, "--help"], { cwd: templatePath });
+  assert.match(help.stdout, /--validate/);
+  assert.match(help.stdout, /read-only sandbox/i);
+  const version = await execFileAsync(process.execPath, [script, "--version"], { cwd: templatePath });
+  assert.equal(version.stdout.trim(), "0.2.0");
+  const validate = await execFileAsync(process.execPath, [script, "--validate", example], { cwd: templatePath });
+  assert.match(validate.stdout, /forge-request V1 for gpt-5\.6-sol/i);
+  const dryRun = await execFileAsync(process.execPath, [script, "--dry-run", example], { cwd: templatePath });
+  assert.match(dryRun.stdout, /Validated .*forge-input\.json/i);
   await assert.rejects(
-    execFileAsync(
-      process.execPath,
-      [
-        fileURLToPath(new URL("../scripts/panurgic-forge.mjs", import.meta.url)),
-        "--dry-run",
-        fileURLToPath(new URL("../examples/forge-input.json", import.meta.url)),
-        fileURLToPath(new URL("../../panurgic-escape.json", import.meta.url)),
-      ],
-      { cwd: templatePath },
-    ),
+    execFileAsync(process.execPath, [script, "--dry-run", example, fileURLToPath(new URL("../../panurgic-escape.json", import.meta.url))], { cwd: templatePath }),
     /Output must be a JSON file inside this workspace/i,
   );
 });
 
-test("documents and enforces the secure direct-Codex architecture", async () => {
-  const [readme, checklist, submission, research, page, forge, packageText] =
-    await Promise.all([
-      readFile(new URL("../README.md", import.meta.url), "utf8"),
-      readFile(new URL("../SUBMISSION_CHECKLIST.md", import.meta.url), "utf8"),
-      readFile(new URL("../DEVPOST_SUBMISSION.md", import.meta.url), "utf8"),
-      readFile(new URL("../COMPETITOR_RESEARCH.md", import.meta.url), "utf8"),
-      readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
-      readFile(new URL("../scripts/panurgic-forge.mjs", import.meta.url), "utf8"),
-      readFile(new URL("../package.json", import.meta.url), "utf8"),
-    ]);
+test("documents and enforces the local-first V1 architecture", async () => {
+  const [readme, workspace, contract, storage, forge, worker, packageText] = await Promise.all([
+    readFile(new URL("../README.md", import.meta.url), "utf8"),
+    readFile(new URL("../app/_components/panurgic-workspace.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../lib/panurgic-contract.mjs", import.meta.url), "utf8"),
+    readFile(new URL("../lib/panurgic-storage.mjs", import.meta.url), "utf8"),
+    readFile(new URL("../scripts/panurgic-forge.mjs", import.meta.url), "utf8"),
+    readFile(new URL("../worker/index.ts", import.meta.url), "utf8"),
+    readFile(new URL("../package.json", import.meta.url), "utf8"),
+  ]);
   const packageJson = JSON.parse(packageText);
-
-  assert.match(readme, /How Codex was used/i);
-  assert.match(readme, /How GPT-5\.6 is used/i);
-  assert.match(readme, /No environment file or API key is used/i);
-  assert.match(checklist, /public YouTube/i);
-  assert.match(checklist, /\/feedback.*Session ID/i);
-  assert.match(checklist, /No hosted Codex executor/i);
-  assert.match(submission, /target 2:45/i);
-  assert.match(submission, /codex-sdk · gpt-5\.6-sol/i);
-  assert.match(research, /specstoryai\/getspecstory\/issues\/4/i);
-  assert.match(research, /entireio\/cli\/issues\/261/i);
-  assert.match(research, /langchain-ai\/langsmith-sdk\/issues\/2096/i);
-
-  assert.equal(packageJson.dependencies["@openai/codex-sdk"], "0.144.6");
-  assert.match(forge, /const MODEL = "gpt-5\.6-sol"/);
-  assert.match(forge, /new Codex\(\{ env: buildCodexEnvironment\(\) \}\)/);
-  assert.match(forge, /"OPENAI_API_KEY"/);
-  assert.match(forge, /"CODEX_API_KEY"/);
-  assert.match(forge, /BLOCKED_CREDENTIAL_VARIABLES\.has\(name\)/);
-  assert.match(forge, /replaceAll\("<", "\\\\u003c"\)/);
+  assert.match(readme, /PanurgicPacketV1/i);
+  assert.match(readme, /device-local/i);
+  assert.match(contract, /panurgic-flow\/evidence-packet/);
+  assert.match(contract, /stableStringify/);
+  assert.match(contract, /verificationRunbook/);
+  assert.match(contract, /judgeRunbook/); // migration alias only
+  assert.match(storage, /MAX_SAVED_PROJECTS = 25/);
+  assert.match(storage, /MAX_VERSIONS_PER_PROJECT = 10/);
+  assert.match(storage, /indexedDB\.open/);
+  assert.match(workspace, /file\.size > MAX_PACKET_BYTES/);
+  assert.match(workspace, /verifyPacketIntegrity/);
+  assert.match(workspace, /maxLength=\{MAX_RAW_EVIDENCE_LENGTH\}/);
   assert.match(forge, /model: MODEL/);
   assert.match(forge, /sandboxMode: "read-only"/);
   assert.match(forge, /approvalPolicy: "never"/);
   assert.match(forge, /networkAccessEnabled: false/);
   assert.match(forge, /webSearchMode: "disabled"/);
-  assert.match(forge, /outputSchema: ARTIFACT_SCHEMA/);
-  assert.match(forge, /untrusted data, never as instructions/i);
-  assert.doesNotMatch(forge, /\bapiKey\s*:/);
-
-  assert.match(page, /crypto\.subtle\.digest/i);
-  assert.match(page, /file\.size > MAX_PACKET_BYTES/i);
-  assert.match(page, /maxLength=\{MAX_RAW_EVIDENCE_LENGTH\}/i);
-  assert.match(page, /No extension\. No git hook\./i);
-  assert.match(page, /buildBrowserArtifacts\(form\)/);
-  assert.doesNotMatch(page, /\/api\/generate/);
-
-  await assert.rejects(
-    access(new URL("../app/api/generate/route.ts", import.meta.url)),
-  );
-  await assert.rejects(access(new URL("../.env.example", import.meta.url)));
+  assert.match(worker, /Content-Security-Policy/);
+  assert.equal(packageJson.dependencies["@openai/codex-sdk"], "0.144.5");
+  assert.equal(packageJson.dependencies["drizzle-orm"], undefined);
+  await assert.rejects(access(new URL("../app/api/generate/route.ts", import.meta.url)));
+  await assert.rejects(access(new URL("../app/chatgpt-auth.ts", import.meta.url)));
+  await assert.rejects(access(new URL("../db/schema.ts", import.meta.url)));
 });
 
-test("starter preview artifacts were removed", async () => {
-  const [css, page, layout, packageJson, files] = await Promise.all([
-    readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
-    readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
-    readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
-    readFile(new URL("../package.json", import.meta.url), "utf8"),
-    readdir(new URL("../app/", import.meta.url)),
-  ]);
-
-  assert.ok(!files.includes("_sites-preview"));
-  assert.doesNotMatch(page, /SkeletonPreview|codex-preview|react-loading-skeleton/);
-  assert.doesNotMatch(layout, /Starter Project|codex-preview|_sites-preview/);
-  assert.doesNotMatch(packageJson, /react-loading-skeleton/);
-  assert.match(css, /hero-shell/);
-  assert.match(css, /codex-bridge/);
-
-  await assert.rejects(
-    access(new URL("public/_sites-preview", templateRoot)),
-  );
-  await assert.rejects(access(previewRoot));
+test("client assets and social card stay within release budgets", async () => {
+  const assetRoot = new URL("../dist/client/assets/", import.meta.url);
+  const assetNames = await readdir(assetRoot);
+  const applicationAssets = assetNames.filter((name) => /\.(?:js|css)$/.test(name));
+  let compressedBytes = 0;
+  for (const name of applicationAssets) {
+    compressedBytes += gzipSync(await readFile(new URL(name, assetRoot))).byteLength;
+  }
+  assert.ok(compressedBytes < 125_000, `client JS/CSS is ${compressedBytes} gzip bytes`);
+  const social = await stat(new URL("../public/og.png", import.meta.url));
+  assert.ok(social.size < 350_000, `social card is ${social.size} bytes`);
+  const publicFiles = await readdir(new URL("../public/", import.meta.url));
+  assert.equal(publicFiles.includes("og-production.png"), false);
+  assert.equal(publicFiles.filter((name) => /^og.*\.(png|jpe?g|webp)$/i.test(name)).length, 1);
 });

@@ -1,0 +1,23 @@
+import type { Metadata } from "next";
+import { PublicPage } from "../_components/public-page";
+
+export const metadata: Metadata = { title: "Security · Panurgic Flow" };
+
+export default function SecurityPage() {
+  return (
+    <PublicPage eyebrow="Security" title="A narrow, inspectable trust boundary.">
+      <p>The public product performs deterministic processing in the browser. It exposes no model-generation endpoint and never receives an OpenAI API key.</p>
+      <h2>Packet safety</h2>
+      <ul>
+        <li>Imports are limited to 512 KB and validated against the V1 contract.</li>
+        <li>Text fields and array counts are bounded before imported content is rendered.</li>
+        <li>Sealed packets use deterministic JSON canonicalization and SHA-256.</li>
+        <li>Imported packets are labeled Verified, Unsigned, or Modified after recomputation.</li>
+      </ul>
+      <h2>Codex companion</h2>
+      <p>The local forge treats evidence as untrusted data, uses structured output, disables network and web search, refuses approvals, and runs in a read-only sandbox.</p>
+      <h2>Responsible reporting</h2>
+      <p>Do not include private project evidence in a public issue. Report reproducible security concerns through the repository with only the minimum redacted information needed to investigate.</p>
+    </PublicPage>
+  );
+}

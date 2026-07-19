@@ -1,15 +1,33 @@
 {
-  "schemaVersion": "1.0",
-  "product": "Panurgic Flow",
+  "kind": "panurgic-flow/forge-request",
+  "schemaVersion": 1,
   "requestedModel": "gpt-5.6-sol",
   "evidence": {
-    "projectName": "Panurgic Flow",
-    "targetTrack": "Engineering",
-    "sourceAgent": "Mixed agents",
-    "rawEvidence": "COMMIT: Added structured output, evidence export, and responsive product UI.\nTEST: Build, browser-local generation, Codex forge validation, and render checks pass.\nCODEX: Implemented the product and forged a structured packet with GPT-5.6.\nDECISION: Keep public execution local and run Codex only in a trusted builder environment.\nPATTERN: raw evidence -> local evidence packet -> Codex SDK forge -> sealed capsule.",
-    "audience": "Engineering teams that need a trustworthy record of how AI-assisted software was designed, built, tested, and reviewed.",
-    "repoSignals": "A hookless evidence normalizer, portable JSON capsule, browser-generated SHA-256 fingerprint, and tested responsive interface.",
-    "codexNotes": "Codex implemented the product, structured the evidence workflow, and can forge an enhanced packet with GPT-5.6 through the local SDK companion.",
-    "workflowPattern": "evidence intake -> browser-local packet -> Codex SDK forge -> claim ledger -> sealed capsule"
+    "project": {
+      "name": "Panurgic Flow",
+      "agentMix": "Codex and mixed-agent development",
+      "goals": "Preserve AI-assisted development provenance as a portable, verifiable record.",
+      "technicalProof": "Evidence normalization, bounded import, claim mapping, artifact export, and SHA-256 verification run locally.",
+      "codexNotes": "Codex implemented and verified the product. GPT-5.6 synthesis runs only in the trusted local companion.",
+      "workflow": "Capture evidence, review grounded claims, export artifacts, and verify sealed packets."
+    },
+    "raw": "COMMIT: Added browser-local packet generation and bounded import.\nTEST: Build, lint, route, accessibility, and forge dry-run checks pass.\nCODEX: Implemented the product and trusted local SDK companion.\nDECISION: Keep hosted execution local and credentials out of the public app.\nPATTERN: evidence intake -> local packet -> Codex forge -> sealed packet.",
+    "parserVersion": 1,
+    "normalized": {
+      "repository": [
+        "Added browser-local packet generation and bounded import.",
+        "Build, lint, route, accessibility, and forge dry-run checks pass."
+      ],
+      "agent": [
+        "Implemented the product and trusted local SDK companion."
+      ],
+      "decisions": [
+        "Keep hosted execution local and credentials out of the public app."
+      ],
+      "patterns": [
+        "evidence intake -> local packet -> Codex forge -> sealed packet."
+      ],
+      "unrecognized": []
+    }
   }
 }

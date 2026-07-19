@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 
 const title = "Panurgic Flow";
 const description =
-  "Turn multi-agent development records into grounded claims, reusable workflow artifacts, and sealed evidence with an optional GPT-5.6 Codex forge.";
+  "Turn AI-assisted development records into grounded claims, verifiable artifacts, and tamper-evident packets without uploading project data.";
 
 export async function generateMetadata(): Promise<Metadata> {
   const requestHeaders = await headers();
@@ -45,8 +45,13 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return {
     metadataBase,
-    title,
+    title: {
+      default: title,
+      template: "%s",
+    },
     description,
+    applicationName: title,
+    alternates: { canonical: "/" },
     icons: {
       icon: "/favicon.svg",
       shortcut: "/favicon.svg",
@@ -57,10 +62,10 @@ export async function generateMetadata(): Promise<Metadata> {
       type: "website",
       images: [
         {
-          url: "/og-production.png",
-          width: 1738,
-          height: 905,
-          alt: "Panurgic Flow turns multi-agent evidence into grounded, sealed proof.",
+          url: "/og.png",
+          width: 1200,
+          height: 630,
+          alt: "Panurgic Flow turns AI-assisted work into verifiable evidence.",
         },
       ],
     },
@@ -68,8 +73,9 @@ export async function generateMetadata(): Promise<Metadata> {
       card: "summary_large_image",
       title,
       description,
-      images: ["/og-production.png"],
+      images: ["/og.png"],
     },
+    robots: { index: true, follow: true },
   };
 }
 

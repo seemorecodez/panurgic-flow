@@ -1,12 +1,13 @@
-minimumReleaseAgeExclude:
-  - '@openai/codex-sdk@0.144.6'
-  - '@openai/codex@0.144.6-darwin-arm64 || 0.144.6-darwin-x64 || 0.144.6-linux-arm64 || 0.144.6-linux-x64 || 0.144.6-win32-arm64 || 0.144.6-win32-x64 || 0.144.6'
+packages:
+  - .
 
-# These exact locked versions need install scripts to provision native build
-# binaries used by the production toolchain. Every unlisted dependency remains
-# blocked by pnpm 11's strict build-approval policy.
 allowBuilds:
-  'esbuild@0.18.20 || 0.25.12 || 0.27.3 || 0.28.1': true
+  # These exact locked versions provision native binaries used by the release
+  # toolchain. Unlisted dependencies remain blocked from running install scripts.
+  'esbuild@0.27.3': true
   'sharp@0.34.5': true
   'unrs-resolver@1.12.2': true
   'workerd@1.20260515.1': true
+
+overrides:
+  postcss: 8.5.10
