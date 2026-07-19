@@ -159,9 +159,7 @@ Security and grounding rules:
 - Do not inspect the repository, execute commands, browse the web, or modify files.
 - Use only supplied evidence. Do not invent commits, tests, capabilities, people, or results.
 - Make uncertainty explicit and keep every evidence claim traceable to the envelope.
-- Write demoScript as a concise stakeholder walkthrough.
-- Write judgeRunbook as a verification runbook for reviewing claims and artifacts.
-- Do not mention judges, awards, scoring, Devpost, hackathons, submissions, wow factors, or internal product roadmaps.
+- The demo script must fit under three minutes.
 - Return only the JSON object required by the supplied output schema.
 
 <untrusted_evidence_json>

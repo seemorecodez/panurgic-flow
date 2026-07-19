@@ -1,6 +1,6 @@
 # Panurgic Flow
 
-Panurgic Flow turns multi-agent development evidence into grounded claims, a verifiable evidence packet, a reusable Codex `SKILL.md`, and a tamper-evident evidence capsule.
+Panurgic Flow turns multi-agent development evidence into grounded claims, a judge-ready build packet, a reusable Codex `SKILL.md`, and a tamper-evident evidence capsule.
 
 OpenAI Build Week category: **Developer Tools**
 
@@ -18,7 +18,7 @@ Panurgic Flow captures raw evidence from Codex, Cursor, Claude Code, GitHub Copi
 - a deterministic claim-to-source ledger that flags weakly supported claims
 - a README proof section
 - an under-three-minute demo script
-- a verification runbook
+- a judge runbook
 - a reusable Codex skill draft
 - a portable JSON evidence capsule with a browser-generated SHA-256 fingerprint
 
@@ -28,7 +28,7 @@ Every artifact can be copied or downloaded, and the complete evidence packet can
 
 Panurgic Flow deliberately separates the public website from trusted Codex execution:
 
-1. **Browser-local path:** deterministic generation, claim mapping, artifact export, and SHA-256 sealing happen in the browser. It needs no account, key, server route, or model quota.
+1. **Browser-local judge path:** deterministic generation, claim mapping, artifact export, and SHA-256 sealing happen in the browser. It needs no account, key, server route, or model quota.
 2. **Trusted Codex forge:** a local Node.js companion uses `@openai/codex-sdk`, the builder's authenticated Codex session, and GPT-5.6. It runs read-only, denies approval requests, disables network and web search, and returns strict structured output for import into the website.
 
 This follows the Codex security boundary: programmatic Codex execution stays in a trusted local environment and is never exposed by the public site.
@@ -39,7 +39,7 @@ The form opens with realistic sample data. No account or private service is requ
 
 1. Open the [public Panurgic Flow demo](https://codex-flight-recorder.seemoreas0-0.chatgpt.site).
 2. Keep the sample mixed-agent evidence or paste your own prefixed lines.
-3. Click **Normalize evidence**, then **Build evidence packet**.
+3. Click **Normalize evidence**, then **Forge judge packet locally**.
 4. Review the manifest and claim-to-source ledger.
 5. Open each artifact tab and use **Copy selected** or **Download .md**.
 6. Click **Seal evidence capsule** and verify that a fingerprint appears.
