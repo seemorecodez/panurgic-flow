@@ -38,14 +38,19 @@ test("server-renders the Codex-native product shell", async () => {
 
   const html = await response.text();
   assert.match(html, /<title>Panurgic Flow<\/title>/i);
-  assert.match(html, /Turn AI-assisted coding into proof/i);
-  assert.match(html, /Forge judge packet locally/i);
+  assert.match(html, /Turn AI-assisted work into evidence you can verify/i);
+  assert.match(html, /Build evidence packet/i);
   assert.match(html, /Direct Codex companion/i);
   assert.match(html, /Download Codex request/i);
   assert.match(html, /Import Codex packet/i);
   assert.match(html, /Hookless multi-agent intake/i);
   assert.match(html, /Claim-to-source ledger/i);
   assert.match(html, /Seal evidence capsule/i);
+  assert.match(html, /Local by default: nothing is uploaded/i);
+  assert.doesNotMatch(
+    html,
+    /OpenAI Build Week|Devpost|Wow factor|Owner action|See why it scores|Official requirement check|Forge judge packet|Judge runbook|judge-ready/i,
+  );
   assert.doesNotMatch(html, /Your site is taking shape/i);
 });
 
@@ -130,6 +135,8 @@ test("documents and enforces the secure direct-Codex architecture", async () => 
   assert.doesNotMatch(forge, /\bapiKey\s*:/);
 
   assert.match(page, /crypto\.subtle\.digest/i);
+  assert.match(page, /file\.size > MAX_PACKET_BYTES/i);
+  assert.match(page, /maxLength=\{MAX_RAW_EVIDENCE_LENGTH\}/i);
   assert.match(page, /No extension\. No git hook\./i);
   assert.match(page, /buildBrowserArtifacts\(form\)/);
   assert.doesNotMatch(page, /\/api\/generate/);

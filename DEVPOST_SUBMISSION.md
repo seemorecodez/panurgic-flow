@@ -12,7 +12,7 @@ Developer Tools
 
 ## Project description
 
-Panurgic Flow is a provenance and workflow-forging tool for multi-agent development. Builders paste evidence from Codex, Cursor, Claude Code, GitHub Copilot, or mixed sessions. The product turns that evidence into a build manifest, README proof section, judge runbook, under-three-minute demo script, and reusable Codex `SKILL.md`.
+Panurgic Flow is a provenance and workflow-forging tool for multi-agent development. Builders paste evidence from Codex, Cursor, Claude Code, GitHub Copilot, or mixed sessions. The product turns that evidence into a build manifest, implementation summary, verification runbook, stakeholder walkthrough, and reusable Codex `SKILL.md`.
 
 The problem is simple: AI-assisted projects often ship without a trustworthy account of what changed, what the human decided, what each agent accelerated, and how someone else can test or repeat the work. Panurgic Flow makes that story concrete, source-linked, and portable.
 
@@ -30,7 +30,7 @@ Browser judge path:
 
 1. Open the hosted Panurgic Flow demo, or install and run the repository with `pnpm install` and `pnpm dev`.
 2. Keep the preloaded sample data.
-3. Click **Normalize evidence**, then **Forge judge packet locally**.
+3. Click **Normalize evidence**, then **Build evidence packet**.
 4. Verify the build manifest, claim ledger, and all four Markdown exports.
 5. Copy or download an artifact, then seal the JSON evidence capsule.
 
@@ -59,7 +59,7 @@ Show the preloaded repository signals, Codex and GPT-5.6 notes, human decision, 
 
 **1:00-1:24 - No-key judge path**
 
-Click **Forge judge packet locally**. Show the browser-local source badge, manifest, claim ledger, and export tabs. Explain that this working path has no account, API key, server route, or quota dependency.
+Click **Build evidence packet**. Show the browser-local source badge, manifest, claim ledger, and export tabs. Explain that this working path has no account, API key, server route, or quota dependency.
 
 **1:24-1:52 - Direct Codex with GPT-5.6**
 
@@ -67,7 +67,7 @@ Download the Codex request. In a terminal, run `pnpm codex:forge -- examples/for
 
 **1:52-2:18 - Working outputs**
 
-Open README proof, demo script, judge runbook, and `SKILL.md`. Copy one artifact, download another, then seal the JSON evidence capsule and show its SHA-256 fingerprint.
+Open the implementation summary, stakeholder walkthrough, verification runbook, and Codex workflow skill. Copy one artifact, download another, then seal the JSON evidence capsule and show its SHA-256 fingerprint.
 
 **2:18-2:45 - Codex role and impact**
 
@@ -86,6 +86,6 @@ Explain that Codex built the interface and forge, researched competitor complain
 - **Field 27946 — Country of Residence:** United States
 - **Field 27947 — Category:** Developer Tools
 - **Field 27948 — Repository URL:** https://github.com/seemorecodez/panurgic-flow
-- **Field 27949 — Project/test URL and judge instructions:** Public demo: https://codex-flight-recorder.seemoreas0-0.chatgpt.site. No login, API key, or model quota is required. Keep the sample evidence, click **Normalize evidence**, click **Forge judge packet locally**, inspect the manifest and claim-to-source ledger, then download an artifact and seal the evidence capsule. The optional direct Codex path is documented in the repository README.
+- **Field 27949 — Project/test URL and judge instructions:** Public demo: https://codex-flight-recorder.seemoreas0-0.chatgpt.site. No login, API key, or model quota is required. Keep the sample evidence, click **Normalize evidence**, click **Build evidence packet**, inspect the manifest and claim-to-source ledger, then download an artifact and seal the evidence capsule. The optional direct Codex path is documented in the repository README.
 - **Field 27950 — Primary `/feedback` Session ID:** **OWNER ACTION — paste the value returned by `/feedback` in the current primary build task. Do not substitute an SDK thread ID.**
 - **Field 27951 — Developer-tool installation, platforms, and testing:** Requires Node.js 22.13+ and `pnpm`; local development supports Windows, macOS, and Linux, while the hosted product supports current desktop and mobile browsers. Run `pnpm install` and `pnpm dev`. Validate with `pnpm codex:forge:dry`, `pnpm lint`, and `pnpm test`. Judges can use the complete public browser path without rebuilding or signing in. The optional model-assisted path uses an authenticated Codex session and `pnpm codex:forge -- examples/forge-input.json`.
