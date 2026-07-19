@@ -41,88 +41,67 @@ type ClaimLedgerEntry = {
   status: "Grounded" | "Review";
 };
 
+const MAX_PACKET_BYTES = 512 * 1024;
+const MAX_PROJECT_NAME_LENGTH = 120;
+const MAX_RAW_EVIDENCE_LENGTH = 50_000;
+const MAX_CONTEXT_LENGTH = 10_000;
+const MAX_ARTIFACT_LENGTH = 64_000;
+
 const SAMPLE_FORM: FormState = {
   projectName: "Panurgic Flow",
-  targetTrack: "Developer Tools",
+  targetTrack: "Engineering",
   sourceAgent: "Mixed agents",
   rawEvidence: `COMMIT: Added structured output, evidence export, and responsive product UI.
 TEST: Build, browser-local generation, Codex forge validation, and render checks pass.
 CODEX: Implemented the product, forged the structured packet with GPT-5.6, and validated deployment.
 DECISION: Keep public execution local and run Codex only in a trusted builder environment.
-PATTERN: raw evidence -> local judge packet -> Codex SDK forge -> sealed capsule.`,
+PATTERN: raw evidence -> local evidence packet -> Codex SDK forge -> sealed capsule.`,
   audience:
-    "Hackathon builders and engineering teams who need a trustworthy story of how AI-assisted software was designed, built, tested, and repeated.",
+    "Engineering teams that need a trustworthy record of how AI-assisted software was designed, built, tested, and reviewed.",
   repoSignals:
     "Evidence: normalizes pasted evidence from multiple coding agents without an IDE extension or git hook. Export: portable evidence capsule with browser-generated SHA-256 fingerprint. Tests: browser-local build and Codex forge validation.",
   codexNotes:
     "Generated claim mapping selects the strongest supplied source and flags weak matches for review. Codex with GPT-5.6 implemented the product and can forge an enhanced packet through the local SDK companion.",
   workflowPattern:
-    "Pattern: evidence intake -> browser-local judge packet -> Codex SDK forge -> claim ledger -> sealed capsule.",
+    "Pattern: evidence intake -> browser-local packet -> Codex SDK forge -> claim ledger -> sealed capsule.",
 };
 
 const LOCAL_SAMPLE = buildBrowserArtifacts(SAMPLE_FORM);
 
 const artifactLabels: Record<keyof Pick<ArtifactResponse, "readmeSection" | "demoScript" | "judgeRunbook" | "skillMarkdown">, string> = {
-  readmeSection: "README proof",
-  demoScript: "3-minute demo script",
-  judgeRunbook: "Judge runbook",
-  skillMarkdown: "Codex SKILL.md",
+  readmeSection: "Implementation summary",
+  demoScript: "Stakeholder walkthrough",
+  judgeRunbook: "Verification runbook",
+  skillMarkdown: "Codex workflow skill",
 };
 
 const artifactFileNames: Record<keyof typeof artifactLabels, string> = {
-  readmeSection: "README-codex-gpt56-section.md",
-  demoScript: "demo-script.md",
-  judgeRunbook: "judge-runbook.md",
+  readmeSection: "implementation-summary.md",
+  demoScript: "stakeholder-walkthrough.md",
+  judgeRunbook: "verification-runbook.md",
   skillMarkdown: "SKILL.md",
 };
 
-const submissionReadiness = [
+const productPrinciples = [
   {
-    label: "Working project",
-    status: "Ready",
-    note: "No-key browser judge path, local Codex SDK forge, and downloadable evidence artifacts.",
+    label: "Execution",
+    value: "Local-first",
+    note: "The browser workflow runs without an account, API key, or server-side model endpoint.",
   },
   {
-    label: "Category",
-    status: "Locked",
-    note: "Developer Tools — agentic workflow provenance and reusable Codex skills.",
+    label: "Grounding",
+    value: "Traceable",
+    note: "Each generated claim points back to the strongest supplied source evidence.",
   },
   {
-    label: "Judge documentation",
-    status: "Ready",
-    note: "Setup, sample data, supported platforms, test steps, and Codex/GPT-5.6 evidence are in the repo.",
+    label: "Portability",
+    value: "Sealed",
+    note: "Artifacts and their evidence ledger export as a fingerprinted JSON capsule.",
   },
   {
-    label: "Submission handoff",
-    status: "Owner action",
-    note: "Add the public YouTube demo, repository URL, and primary /feedback Session ID before submitting.",
-  },
-];
-
-const wowFactors = [
-  {
-    number: "01",
-    title: "Hookless multi-agent intake",
-    complaint:
-      "Observed complaint: capture can break across IDE storage changes and remote workspaces, while workflow hooks can collide with existing git setup.",
-    answer:
-      "Paste evidence from Codex, Cursor, Claude Code, Copilot, or a mixed session and normalize it locally—no extension or git hook required.",
-  },
-  {
-    number: "02",
-    title: "Claim-to-source ledger",
-    complaint:
-      "Observed complaint: transcript and trace exports can omit tool activity or fail silently, leaving reviewers unsure what supports a claim.",
-    answer:
-      "Every generated evidence claim is matched to the strongest supplied source; weak matches are visibly flagged for human review.",
-  },
-  {
-    number: "03",
-    title: "Tamper-evident evidence capsule",
-    complaint:
-      "Observed complaint: large trace exports can be slow and provide little completion visibility.",
-    answer:
-      "Seal the complete packet into portable JSON with a local SHA-256 fingerprint in one click.",
+    label: "Control",
+    value: "Human-reviewed",
+    note: "Weak matches stay visibly flagged instead of receiving invented confidence scores.",
   },
 ];
 
@@ -195,34 +174,34 @@ function compactEvidence(value: string, fallback: string) {
 
 function buildBrowserArtifacts(input: FormState): ArtifactResponse {
   const name = compactEvidence(input.projectName, "Panurgic Flow");
-  const track = compactEvidence(input.targetTrack, "Developer Tools");
+  const track = compactEvidence(input.targetTrack, "Engineering");
   const audience = compactEvidence(
     input.audience,
-    "Builders and reviewers who need trustworthy AI-development evidence.",
+    "Engineering teams that need trustworthy AI-development evidence.",
   );
   const repo = compactEvidence(
     input.repoSignals,
-    "No repository signals were supplied; add evidence before submission.",
+    "No repository signals were supplied; add evidence before relying on this packet.",
   );
   const notes = compactEvidence(
     input.codexNotes,
-    "No Codex collaboration notes were supplied; add evidence before submission.",
+    "No Codex collaboration notes were supplied; add evidence before relying on this packet.",
   );
   const workflow = compactEvidence(
     input.workflowPattern,
-    "evidence intake -> local judge packet -> Codex forge -> sealed capsule",
+    "evidence intake -> local packet -> Codex forge -> sealed capsule",
   );
 
   return {
     source: "browser-local",
-    model: "deterministic judge path",
+    model: "deterministic local forge",
     manifest: {
       thesis: `${name} turns multi-agent development evidence into grounded claims, reusable Codex guidance, and sealed proof.`,
       audience,
       codexRole:
         "Codex is the trusted local forge: the SDK companion uses GPT-5.6 to transform exported evidence into structured artifacts without exposing Codex execution on the public website.",
       gptRole:
-        "GPT-5.6 runs through the authenticated Codex SDK companion. The hosted judge path stays deterministic, private-key-free, and immediately testable.",
+        "GPT-5.6 runs through the authenticated Codex SDK companion. The hosted workflow stays deterministic, private-key-free, and immediately testable.",
       evidence: [
         `Repository signals: ${repo}`,
         `${input.sourceAgent} notes: ${notes}`,
@@ -233,51 +212,51 @@ function buildBrowserArtifacts(input: FormState): ArtifactResponse {
         "Imported Codex output still requires human review against commits, tests, and the original agent record.",
       ],
       nextMilestones: [
-        "Import git history into the hookless intake flow.",
-        "Verify sealed capsules after re-import.",
-        `Expand the ${track} workflow into a reusable team policy.`,
+        "Compare every claim against the original commits, tests, and agent record.",
+        "Verify the capsule fingerprint after transfer or re-import.",
+        `Record reviewer approval for the ${track} evidence packet.`,
       ],
     },
     readmeSection: `## Built with Codex and GPT-5.6
 
-${name} uses a two-path architecture. The hosted app creates a complete deterministic judge packet in the browser, so no account, API key, or model quota is required to test it. For the model-assisted path, the local Codex SDK companion runs GPT-5.6 inside the builder's trusted environment and returns a structured packet for import.
+${name} uses a two-path architecture. The hosted app creates a complete deterministic evidence packet in the browser, so no account, API key, or model quota is required. For the model-assisted path, the local Codex SDK companion runs GPT-5.6 inside the builder's trusted environment and returns a structured packet for import.
 
 The evidence flow is:
 
 1. Normalize repository, test, decision, and workflow evidence.
-2. Forge an immediate browser-local packet or export a Codex forge request.
+2. Build an immediate browser-local packet or export a Codex forge request.
 3. Run \`pnpm codex:forge -- <request.json>\` through an authenticated Codex session.
 4. Import the Codex packet, inspect the claim-to-source ledger, and seal the complete record.
 
 Human review remains the final authority for every generated claim.`,
-    demoScript: `0:00 — Introduce the problem: agentic projects lose their evidence across tools, workspaces, and exports.
-0:22 — Paste mixed-agent evidence and normalize it without an extension or git hook.
-0:50 — Forge the browser-local judge packet and show that it requires no API key or account.
-1:15 — Export the Codex forge request and show the local GPT-5.6 companion command.
-1:42 — Import a Codex-generated packet and inspect the claim-to-source ledger.
-2:08 — Seal the evidence capsule and show its SHA-256 fingerprint.
-2:34 — Close with the reusable pattern: trusted Codex forge, public deterministic proof.`,
-    judgeRunbook: `# Judge Runbook
+    demoScript: `1. Paste mixed-agent evidence and normalize it without an extension or git hook.
+2. Build the browser-local evidence packet without an API key or account.
+3. Inspect the claim-to-source ledger and resolve anything marked for review.
+4. Export a Codex request when model-assisted synthesis is useful.
+5. Import the structured Codex packet and compare it with the source evidence.
+6. Seal the evidence capsule and retain its SHA-256 fingerprint with the record.`,
+    judgeRunbook: `# Verification Runbook
 
-## Instant browser path
+## Browser workflow
 
-1. Open Panurgic Flow.
-2. Keep the sample evidence and click **Normalize evidence**.
-3. Click **Forge judge packet locally**.
-4. Review the three grounded claims and export the sealed evidence capsule.
+1. Open Panurgic Flow and supply an evidence envelope.
+2. Click **Normalize evidence**.
+3. Click **Build evidence packet**.
+4. Review every claim-to-source match.
+5. Export an artifact and seal the evidence capsule.
 
 No account, API key, or model quota is required.
 
-## Optional Codex path
+## Optional Codex workflow
 
 1. Install dependencies with \`pnpm install\`.
 2. Sign in to Codex with ChatGPT using \`codex login\` if needed.
 3. Run \`pnpm codex:forge -- examples/forge-input.json\`.
 4. Import \`outputs/panurgic-codex-packet.json\` into the website.
-5. Verify the source label reads \`codex-sdk · gpt-5.6-sol\`.`,
+5. Verify the source label reads \`codex-sdk · gpt-5.6-sol\` and review all claims.`,
     skillMarkdown: `---
 name: panurgic-flow
-description: Turn Codex-assisted development evidence into grounded judge artifacts and a sealed, reusable workflow packet.
+description: Turn Codex-assisted development evidence into grounded artifacts and a sealed, reusable workflow packet.
 ---
 
 # Panurgic Flow
@@ -298,7 +277,7 @@ Use this skill when a project needs a trustworthy record of how Codex and GPT-5.
 - Specific evidence beats impressive-sounding language.
 - Codex execution stays in a trusted local environment.
 - A hash proves integrity, not truth.
-- Judges always retain a no-key test path.`,
+- The browser workflow remains available without credentials.`,
   };
 }
 
@@ -308,24 +287,29 @@ function isArtifactResponse(value: unknown): value is ArtifactResponse {
   const manifest = packet.manifest;
   if (!manifest || typeof manifest !== "object") return false;
   const fields = manifest as Record<string, unknown>;
-  const isStringArray = (entry: unknown) =>
+  const isSafeString = (entry: unknown, maxLength = MAX_ARTIFACT_LENGTH) =>
+    typeof entry === "string" &&
+    entry.trim().length > 0 &&
+    entry.length <= maxLength;
+  const isStringArray = (entry: unknown, count: number) =>
     Array.isArray(entry) &&
-    entry.length > 0 &&
-    entry.every((item) => typeof item === "string" && item.length > 0);
+    entry.length === count &&
+    entry.every((item) => isSafeString(item, MAX_CONTEXT_LENGTH));
 
   return (
-    typeof packet.source === "string" &&
-    typeof fields.thesis === "string" &&
-    typeof fields.audience === "string" &&
-    typeof fields.codexRole === "string" &&
-    typeof fields.gptRole === "string" &&
-    isStringArray(fields.evidence) &&
-    isStringArray(fields.risks) &&
-    isStringArray(fields.nextMilestones) &&
-    typeof packet.readmeSection === "string" &&
-    typeof packet.demoScript === "string" &&
-    typeof packet.judgeRunbook === "string" &&
-    typeof packet.skillMarkdown === "string"
+    isSafeString(packet.source, 80) &&
+    (packet.model === undefined || isSafeString(packet.model, 120)) &&
+    isSafeString(fields.thesis, MAX_CONTEXT_LENGTH) &&
+    isSafeString(fields.audience, MAX_CONTEXT_LENGTH) &&
+    isSafeString(fields.codexRole, MAX_CONTEXT_LENGTH) &&
+    isSafeString(fields.gptRole, MAX_CONTEXT_LENGTH) &&
+    isStringArray(fields.evidence, 3) &&
+    isStringArray(fields.risks, 2) &&
+    isStringArray(fields.nextMilestones, 3) &&
+    isSafeString(packet.readmeSection) &&
+    isSafeString(packet.demoScript) &&
+    isSafeString(packet.judgeRunbook) &&
+    isSafeString(packet.skillMarkdown)
   );
 }
 
@@ -356,32 +340,6 @@ export default function Home() {
   const claimLedger = useMemo(
     () => buildClaimLedger(artifacts.manifest.evidence, form),
     [artifacts.manifest.evidence, form],
-  );
-
-  const manifestScore = useMemo(
-    () => [
-      {
-        label: "Implementation",
-        value: "Codex-native",
-        note: "Shows a working generator, not a static writeup.",
-      },
-      {
-        label: "Design",
-        value: "Judge-first",
-        note: "Every output maps to a submission burden.",
-      },
-      {
-        label: "Impact",
-        value: "Reusable",
-        note: "Exports the workflow as a Codex skill.",
-      },
-      {
-        label: "Entropy",
-        value: "High",
-        note: "The project documents itself and forges its own repeatable process.",
-      },
-    ],
-    [],
   );
 
   function updateField(field: keyof FormState, value: string) {
@@ -436,6 +394,10 @@ export default function Home() {
 
   function generateArtifacts(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (!form.projectName.trim() || !form.rawEvidence.trim()) {
+      setForgeStatus("Add a project name and evidence before building a packet.");
+      return;
+    }
     setCopied("");
     setCapsuleHash("");
     setArtifacts(buildBrowserArtifacts(form));
@@ -460,6 +422,10 @@ export default function Home() {
     const file = event.target.files?.[0];
     event.target.value = "";
     if (!file) return;
+    if (file.size > MAX_PACKET_BYTES) {
+      setForgeStatus("That Codex packet is larger than the 512 KB import limit.");
+      return;
+    }
 
     try {
       const parsed = JSON.parse(await file.text()) as unknown;
@@ -478,9 +444,14 @@ export default function Home() {
   }
 
   async function copySelected() {
-    const text = artifacts[activeArtifact];
-    await navigator.clipboard.writeText(text);
-    setCopied(artifactLabels[activeArtifact]);
+    try {
+      const text = artifacts[activeArtifact];
+      await navigator.clipboard.writeText(text);
+      setCopied(artifactLabels[activeArtifact]);
+    } catch {
+      setCopied("");
+      setForgeStatus("Clipboard access was unavailable. Download the artifact instead.");
+    }
   }
 
   function downloadSelected() {
@@ -497,7 +468,8 @@ export default function Home() {
   }
 
   async function downloadCapsule() {
-    const baseCapsule = {
+    try {
+      const baseCapsule = {
       schemaVersion: "1.0",
       product: "Panurgic Flow",
       createdAt: new Date().toISOString(),
@@ -505,21 +477,25 @@ export default function Home() {
       input: form,
       output: artifacts,
       claimLedger,
-    };
-    const unsignedJson = JSON.stringify(baseCapsule, null, 2);
-    const digest = await crypto.subtle.digest(
-      "SHA-256",
-      new TextEncoder().encode(unsignedJson),
-    );
-    const fingerprint = Array.from(new Uint8Array(digest))
-      .map((byte) => byte.toString(16).padStart(2, "0"))
-      .join("");
-    const sealedCapsule = {
-      ...baseCapsule,
-      fingerprint: { algorithm: "SHA-256", value: fingerprint },
-    };
-    downloadJsonFile("panurgic-flow-evidence-capsule.json", sealedCapsule);
-    setCapsuleHash(fingerprint);
+      };
+      const unsignedJson = JSON.stringify(baseCapsule, null, 2);
+      const digest = await crypto.subtle.digest(
+        "SHA-256",
+        new TextEncoder().encode(unsignedJson),
+      );
+      const fingerprint = Array.from(new Uint8Array(digest))
+        .map((byte) => byte.toString(16).padStart(2, "0"))
+        .join("");
+      const sealedCapsule = {
+        ...baseCapsule,
+        fingerprint: { algorithm: "SHA-256", value: fingerprint },
+      };
+      downloadJsonFile("panurgic-flow-evidence-capsule.json", sealedCapsule);
+      setCapsuleHash(fingerprint);
+    } catch {
+      setCapsuleHash("");
+      setForgeStatus("This browser could not seal the capsule. Try a current browser.");
+    }
   }
 
   return (
@@ -531,29 +507,28 @@ export default function Home() {
         <nav className="topbar" aria-label="Product">
           <div className="brand-mark">PF</div>
           <span>Panurgic Flow</span>
-          <a href="#generator">Open the forge</a>
+          <a href="#generator">Open workspace</a>
         </nav>
 
         <div className="hero-grid">
           <div className="hero-copy">
-            <p className="eyebrow">OpenAI Build Week · Developer Tools</p>
+            <p className="eyebrow">Agentic development provenance</p>
             <h1>
-              Turn AI-assisted coding into proof, a demo, and a reusable Codex
-              skill.
+              Turn AI-assisted work into evidence you can verify.
             </h1>
             <p className="lede">
-              Panurgic Flow turns multi-agent evidence into grounded claims,
-              judge-ready artifacts, and a sealed proof capsule. The public
-              path needs no key; the trusted local Codex companion forges the
-              enhanced packet with GPT-5.6.
+              Panurgic Flow converts mixed-agent development records into
+              grounded claims, reusable workflow artifacts, and a sealed
+              evidence capsule. The browser workflow stays local and the
+              optional Codex companion adds structured GPT-5.6 synthesis.
             </p>
 
             <div className="hero-actions">
               <a className="primary-action" href="#generator">
-                Generate artifacts
+                Build evidence packet
               </a>
-              <a className="secondary-action" href="#rubric">
-                See why it scores
+              <a className="secondary-action" href="#principles">
+                Review trust model
               </a>
             </div>
           </div>
@@ -572,7 +547,7 @@ export default function Home() {
               </div>
               <div>
                 <small>02 · Synthesize</small>
-                <strong>Browser-local judge packet</strong>
+                <strong>Grounded evidence packet</strong>
               </div>
               <div>
                 <small>03 · Codex forge</small>
@@ -583,8 +558,8 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="rubric" className="rubric-grid">
-        {manifestScore.map((item) => (
+      <section id="principles" className="rubric-grid" aria-label="Trust model">
+        {productPrinciples.map((item) => (
           <article key={item.label} className="score-card">
             <p>{item.label}</p>
             <strong>{item.value}</strong>
@@ -593,67 +568,24 @@ export default function Home() {
         ))}
       </section>
 
-      <section className="wow-shell" aria-labelledby="wow-heading">
-        <div className="wow-heading">
-          <p className="eyebrow">Complaint-driven differentiation</p>
-          <h2 id="wow-heading">
-            Three gaps competitors exposed. Three working answers.
-          </h2>
-        </div>
-        <div className="wow-grid">
-          {wowFactors.map((factor) => (
-            <article key={factor.number}>
-              <span>{factor.number}</span>
-              <h3>{factor.title}</h3>
-              <p>{factor.complaint}</p>
-              <strong>{factor.answer}</strong>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="readiness-shell" aria-labelledby="readiness-heading">
-        <div className="readiness-heading">
-          <div>
-            <p className="eyebrow">Official requirement check</p>
-            <h2 id="readiness-heading">Built for a clean Devpost handoff.</h2>
-          </div>
-          <p>
-            The product and repository cover the technical requirements. The
-            final identity, video, repository-sharing, and submission actions
-            stay with the entrant.
-          </p>
-        </div>
-        <div className="readiness-grid">
-          {submissionReadiness.map((item) => (
-            <article key={item.label}>
-              <div>
-                <p>{item.label}</p>
-                <span className={item.status === "Owner action" ? "needs-action" : ""}>
-                  {item.status}
-                </span>
-              </div>
-              <strong>{item.note}</strong>
-            </article>
-          ))}
-        </div>
-      </section>
-
       <section id="generator" className="workspace-grid">
         <form className="input-panel" onSubmit={generateArtifacts}>
           <div className="panel-heading">
-              <p className="eyebrow">Flow input</p>
-            <h2>Feed the build story.</h2>
+            <p className="eyebrow">Evidence workspace</p>
+            <h2>Capture the build record.</h2>
             <span>
-              Keep the sample data for a quick judge path, or replace it with
-              evidence from the current repo.
+              Start with the sample envelope or replace it with evidence from
+              your current project.
             </span>
+            <p className="privacy-note">
+              Local by default: nothing is uploaded unless you explicitly export it.
+            </p>
           </div>
 
           <div className="intake-box">
             <div className="intake-heading">
               <div>
-                <p className="eyebrow">Wow factor 01</p>
+                <p className="eyebrow">Capture</p>
                 <h3>Hookless multi-agent intake</h3>
               </div>
               <span>No extension. No git hook.</span>
@@ -681,6 +613,7 @@ export default function Home() {
                   updateField("rawEvidence", event.target.value)
                 }
                 rows={8}
+                maxLength={MAX_RAW_EVIDENCE_LENGTH}
               />
             </label>
             <button
@@ -698,28 +631,30 @@ export default function Home() {
             <input
               value={form.projectName}
               onChange={(event) => updateField("projectName", event.target.value)}
+              maxLength={MAX_PROJECT_NAME_LENGTH}
             />
           </label>
 
           <label>
-            Track
+            Workflow context
             <select
               value={form.targetTrack}
               onChange={(event) => updateField("targetTrack", event.target.value)}
             >
-              <option>Developer Tools</option>
-              <option>Work & Productivity</option>
-              <option>Education</option>
-              <option>Apps for Your Life</option>
+              <option>Engineering</option>
+              <option>Product</option>
+              <option>Research</option>
+              <option>Operations</option>
             </select>
           </label>
 
           <label>
-            Real audience
+            Intended reviewers
             <textarea
               value={form.audience}
               onChange={(event) => updateField("audience", event.target.value)}
               rows={3}
+              maxLength={MAX_CONTEXT_LENGTH}
             />
           </label>
 
@@ -731,6 +666,7 @@ export default function Home() {
                 updateField("repoSignals", event.target.value)
               }
               rows={5}
+              maxLength={MAX_CONTEXT_LENGTH}
             />
           </label>
 
@@ -740,6 +676,7 @@ export default function Home() {
               value={form.codexNotes}
               onChange={(event) => updateField("codexNotes", event.target.value)}
               rows={5}
+              maxLength={MAX_CONTEXT_LENGTH}
             />
           </label>
 
@@ -751,6 +688,7 @@ export default function Home() {
                 updateField("workflowPattern", event.target.value)
               }
               rows={4}
+              maxLength={MAX_CONTEXT_LENGTH}
             />
           </label>
 
@@ -785,14 +723,14 @@ export default function Home() {
           </div>
 
           <button className="generate-button">
-            Forge judge packet locally
+            Build evidence packet
           </button>
         </form>
 
         <section className="output-panel" aria-live="polite">
           <div className="panel-heading output-heading">
             <div>
-              <p className="eyebrow">Build packet</p>
+              <p className="eyebrow">Evidence packet</p>
               <h2>{artifacts.manifest.thesis}</h2>
             </div>
             <span className="source-pill">
@@ -838,7 +776,7 @@ export default function Home() {
               </ul>
             </div>
             <div>
-              <h3>Next milestones</h3>
+              <h3>Verification checklist</h3>
               <ul>
                 {artifacts.manifest.nextMilestones.map((item) => (
                   <li key={item}>{item}</li>
@@ -850,7 +788,7 @@ export default function Home() {
           <section className="ledger-shell" aria-labelledby="ledger-heading">
             <div className="ledger-heading">
               <div>
-                <p className="eyebrow">Wow factor 02</p>
+                <p className="eyebrow">Grounding</p>
                 <h3 id="ledger-heading">Claim-to-source ledger</h3>
               </div>
               <span>Deterministic token matching</span>
@@ -872,7 +810,7 @@ export default function Home() {
                   <strong>
                     {entry.matchedTerms.length
                       ? `Matched: ${entry.matchedTerms.join(", ")}`
-                      : "No exact supporting terms found—verify before submission."}
+                      : "No exact supporting terms found—verify before relying on this claim."}
                   </strong>
                 </article>
               ))}
@@ -913,7 +851,7 @@ export default function Home() {
 
           {capsuleHash ? (
             <p className="capsule-proof">
-              <span>Wow factor 03 · sealed</span>
+              <span>Capsule sealed</span>
               SHA-256 {capsuleHash.slice(0, 16)}…{capsuleHash.slice(-12)}
             </p>
           ) : null}
