@@ -45,8 +45,28 @@ test("builds deterministic V1 content for fixed identity and time", () => {
   assert.deepEqual(first, second);
   assert.ok(isPanurgicPacketV1(first));
   assert.equal(first.schemaVersion, 1);
+  assert.deepEqual(Object.keys(first.artifacts), [
+    "implementationSummary",
+    "stakeholderWalkthrough",
+    "verificationRunbook",
+    "codexSkill",
+  ]);
   assert.ok(first.artifacts.verificationRunbook.includes("verification runbook"));
   assert.equal("judgeRunbook" in first.artifacts, false);
+  assert.ok(first.claimLedger.every(({ status }) => status === "grounded" || status === "review"));
+  const reviewPacket = buildBrowserPacket(
+    {
+      ...SAMPLE_FORM,
+      projectName: "Sparse evidence",
+      rawEvidence: "COMMIT: x",
+      technicalProof: "x",
+      codexNotes: "x",
+      goals: "x",
+      workflow: "x",
+    },
+    options,
+  );
+  assert.ok(reviewPacket.claimLedger.some(({ status }) => status === "review"));
 });
 
 test("canonical JSON is stable across object insertion order", () => {

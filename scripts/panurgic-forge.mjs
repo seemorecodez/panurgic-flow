@@ -4,11 +4,10 @@ import { basename, dirname, relative, resolve } from "node:path";
 import process from "node:process";
 import {
   FORGE_REQUEST_KIND,
-  PACKET_KIND,
-  PACKET_SCHEMA_VERSION,
   isPanurgicPacketV1,
   validateForgeRequest,
 } from "../lib/panurgic-contract.mjs";
+import { buildBrowserPacket } from "../lib/panurgic-core.mjs";
 
 const MODEL = "gpt-5.6-sol";
 const CLI_VERSION = "0.2.0";
@@ -210,18 +209,28 @@ async function main() {
   const artifact = JSON.parse(turn.finalResponse);
   const preserved = normalizedEvidence(request);
   const now = new Date().toISOString();
+  const browserPacket = buildBrowserPacket(
+    {
+      projectName: preserved.project.name,
+      agentMix: preserved.project.agentMix,
+      goals: preserved.project.goals,
+      technicalProof: preserved.project.technicalProof,
+      codexNotes: preserved.project.codexNotes,
+      workflow: preserved.project.workflow,
+      rawEvidence: preserved.evidence.raw,
+    },
+    {
+      packetId: globalThis.crypto.randomUUID(),
+      createdAt: now,
+      now,
+    },
+  );
   const packet = {
-    kind: PACKET_KIND,
-    schemaVersion: PACKET_SCHEMA_VERSION,
-    packetId: globalThis.crypto.randomUUID(),
-    createdAt: now,
-    updatedAt: now,
-    project: preserved.project,
+    ...browserPacket,
     source: { type: "codex-sdk", model: MODEL },
     evidence: preserved.evidence,
     manifest: artifact.manifest,
     artifacts: artifact.artifacts,
-    claimLedger: [],
   };
   if (!isPanurgicPacketV1(packet, { allowIntegrity: true })) {
     throw new Error("Codex returned output that does not satisfy the Panurgic Flow V1 contract.");

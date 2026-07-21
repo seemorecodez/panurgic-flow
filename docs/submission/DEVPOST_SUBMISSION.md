@@ -1,10 +1,10 @@
-# Panurgic Flow - Devpost submission draft
+# Panurgic Flow - final Devpost submission draft
 
-> Entrant gate: rewrite the project-description section in your own voice before pasting it into Devpost. Preserve the verified technical facts, but do not submit this AI-assisted draft as-is.
+> Entrant approval gate: read the project-description section, adjust any wording that does not sound like you, and explicitly approve it before it is published to Devpost.
 
 ## Tagline
 
-Turn Codex build evidence into a judge-ready proof packet and a reusable workflow skill.
+Turn multi-agent coding evidence into grounded claims, sealed proof, and a reusable workflow skill.
 
 ## Category
 
@@ -12,27 +12,41 @@ Developer Tools
 
 ## Project description
 
-Panurgic Flow is a provenance and workflow-forging tool for multi-agent development. Builders paste evidence from Codex, Cursor, Claude Code, GitHub Copilot, or mixed sessions. The product turns that evidence into a build manifest, implementation summary, verification runbook, stakeholder walkthrough, and reusable Codex `SKILL.md`.
+### Inspiration
 
-The problem is simple: AI-assisted projects often ship without a trustworthy account of what changed, what the human decided, what each agent accelerated, and how someone else can test or repeat the work. Panurgic Flow makes that story concrete, source-linked, and portable.
+When I build with AI coding tools, the finished code usually survives, but the evidence behind it does not. Decisions are buried in chat, generated summaries lose their sources, and another person cannot easily tell what was verified. I built Panurgic Flow to preserve that record without forcing developers to install a git hook, upload private project material, or trust a hidden scoring system.
 
-The app has two intentionally separated execution paths. Its hosted judge path performs evidence normalization, deterministic artifact generation, claim-to-source mapping, and SHA-256 capsule sealing entirely in the browser, so it needs no account, API key, or model quota. Its trusted local companion uses the OpenAI Codex SDK with GPT-5.6, strict structured output, a read-only sandbox, no approvals, and disabled network/web search. Builders export evidence from the site, forge a packet through their authenticated Codex session, then import it for inspection and sealing.
+### What I built
 
-Codex served as the primary implementation partner across workspace setup, interface and SDK development, competitor research, debugging, test creation, compliance review, documentation, and deployment. The human selected the concept and Developer Tools audience, named Panurgic Flow, and made the core product decisions around evidence grounding, the public/trusted security boundary, and judge usability.
+Panurgic Flow is a local-first provenance workspace for AI-assisted development. It accepts evidence from Codex or a mixed-agent workflow, previews recognized and unrecognized lines, and turns the supplied record into a versioned evidence packet.
 
-GPT-5.6 is the synthesis engine in the Codex companion. It converts noisy project evidence into structured reviewer-facing artifacts and a portable workflow skill. This is a meaningful product function, not decorative text generation.
+The workflow has three stages. Capture normalizes repository activity, test results, Codex notes, human decisions, and reusable patterns. Review creates a manifest and a claim-to-source ledger where each claim is labeled Grounded or Review. Export produces four artifacts: an implementation summary, stakeholder walkthrough, verification runbook, and Codex workflow skill.
+
+Projects and recent packet versions stay in IndexedDB on the current device. The app falls back to session memory when persistent storage is unavailable. Sealing uses deterministic canonical JSON and SHA-256. When a packet is imported again, Panurgic Flow identifies it as Verified, Unsigned, or Modified.
+
+### Codex and GPT-5.6
+
+Codex was my primary implementation partner for the architecture, interface refactor, deterministic contract, tests, accessibility checks, security hardening, documentation, and deployment preparation. I chose the product problem, Developer Tools audience, Panurgic Flow name, local/public trust boundary, evidence policy, artifact set, and the final claims that can be shared.
+
+The optional trusted companion uses `@openai/codex-sdk` with `gpt-5.6-sol`. It accepts a bounded forge request and returns structured `PanurgicPacketV1` output under a read-only sandbox with approvals denied and network access and web search disabled. The public website does not run the model, expose an API key, or provide a hosted generation endpoint.
+
+During final verification, a fresh authenticated run produced a valid V1 packet with three traceable claims, two risks, a three-step verification checklist, and all four current artifacts. The imported packet identifies its source as `codex-sdk · gpt-5.6-sol`.
+
+### What I learned
+
+The most important boundary is that integrity is not the same as truth. A valid SHA-256 seal proves that a packet has not changed after it was sealed; it cannot prove that the original evidence was accurate. Panurgic Flow keeps the evidence visible, marks weakly supported claims for review, and leaves final approval with the human.
 
 ## Developer-tool testing instructions
 
-Supported platforms: current desktop/mobile browsers; local development on Windows, macOS, or Linux with Node.js 22.13+ and `pnpm`.
+Supported platforms: current desktop and mobile browsers; local development on Windows, macOS, or Linux with Node.js 22.13+ and pnpm 11.
 
-Browser judge path:
+Public browser workflow:
 
-1. Open the hosted Panurgic Flow demo, or install and run the repository with `pnpm install` and `pnpm dev`.
-2. Keep the preloaded sample data.
-3. Click **Load sample**, review the parser preview, select **Normalize recognized evidence**, then click **Build evidence packet**.
-4. Verify the build manifest, claim ledger, and all four Markdown exports.
-5. Copy or download an artifact, then select **Seal and download packet**.
+1. Open the hosted Panurgic Flow demo, or install and run the repository with `pnpm install --frozen-lockfile` and `pnpm dev`.
+2. Click **Load sample**, review the parser preview, select **Normalize recognized evidence**, then click **Build evidence packet**.
+3. Verify the build manifest, claim ledger, and all four Markdown exports.
+4. Copy or download an artifact, then select **Seal and download packet**.
+5. Re-import the sealed packet and confirm that its integrity state is **Verified**.
 
 No account or API key is required for this complete path.
 
@@ -43,49 +57,26 @@ Optional GPT-5.6 Codex path:
 3. Import `outputs/panurgic-codex-packet.json` into the website.
 4. Verify the source badge reads `codex-sdk · gpt-5.6-sol`, inspect its claim ledger, and seal it.
 
-## Demo video script - target 2:45
+## Demonstration video
 
-**0:00-0:18 - Problem**
+- Direct video: https://www.youtube.com/watch?v=r3e1KMz23B0
+- Channel: https://www.youtube.com/@Panurgic-Flow
+- Runtime: 2:46
+- Narration source: `C:\Users\frank\OneDrive\Documents\Panurgic Flow YouTube Package\NARRATION.md`
 
-AI-assisted projects often lose the build story. Judges and teammates see the result, but not what changed, what Codex accelerated, where the human decided, or how the workflow can be repeated.
-
-**0:18-0:36 - Product**
-
-This is Panurgic Flow, a Developer Tools project that turns multi-agent build evidence into grounded claims, a judge-ready proof packet, and a reusable workflow skill.
-
-**0:36-1:00 - Input**
-
-Show the preloaded repository signals, Codex and GPT-5.6 notes, human decision, and workflow pattern. Normalize the prefixed evidence and explain that generated claims must stay grounded in these sources.
-
-**1:00-1:24 - No-key judge path**
-
-Click **Build evidence packet**. Show the browser-local source badge, manifest, claim ledger, and export tabs. Explain that this working path has no account, API key, server route, or quota dependency.
-
-**1:24-1:52 - Direct Codex with GPT-5.6**
-
-Download the Codex request. In a terminal, run `pnpm codex:forge -- examples/forge-input.json`, explain that Sol is the GPT-5.6 Power variant, show the read-only structured-output guardrails, and import the resulting packet. Show the `codex-sdk · gpt-5.6-sol` badge.
-
-**1:52-2:18 - Working outputs**
-
-Open the implementation summary, stakeholder walkthrough, verification runbook, and Codex workflow skill. Copy one artifact, download another, then seal the V1 packet and show its verified SHA-256 fingerprint.
-
-**2:18-2:45 - Codex role and impact**
-
-Explain that Codex built the interface and forge, researched competitor complaints, debugged the environment, created tests, performed the compliance pass, and deployed the site. Name the human decisions: the hybrid concept, Panurgic Flow name, evidence grounding, and trusted/public split. Close on the three complaint-driven differentiators: hookless intake, claim-to-source review, and portable sealed proof.
-
-## Final links to add
+## Final links
 
 - Live demo: https://codex-flight-recorder.seemoreas0-0.chatgpt.site
 - Code repository: https://github.com/seemorecodez/panurgic-flow
-- Public or Unlisted YouTube demo: **OWNER ACTION — add URL**
-- Primary `/feedback` Session ID: **OWNER ACTION — run `/feedback` in the primary build task and add the returned ID**
+- Public YouTube demo: https://www.youtube.com/watch?v=r3e1KMz23B0
+- Primary `/feedback` Session ID: **OWNER ACTION - run `/feedback` in the current primary build task and add the returned ID**
 
 ## Exact Devpost field answers
 
-- **Field 27945 — Submitter Type:** Individual
-- **Field 27946 — Country of Residence:** United States
-- **Field 27947 — Category:** Developer Tools
-- **Field 27948 — Repository URL:** https://github.com/seemorecodez/panurgic-flow
-- **Field 27949 — Project/test URL and judge instructions:** Public demo: https://codex-flight-recorder.seemoreas0-0.chatgpt.site. No login, API key, or model quota is required. Click **Load sample**, review the parser preview, select **Normalize recognized evidence**, click **Build evidence packet**, inspect the manifest and claim-to-source ledger, then download an artifact and seal the V1 packet. Re-import the sealed packet to confirm its fingerprint. The optional direct Codex path is documented in the repository README.
-- **Field 27950 — Primary `/feedback` Session ID:** **OWNER ACTION — paste the value returned by `/feedback` in the current primary build task. Do not substitute an SDK thread ID.**
-- **Field 27951 — Developer-tool installation, platforms, and testing:** Requires Node.js 22.13+ and `pnpm`; local development supports Windows, macOS, and Linux, while the hosted product supports current desktop and mobile browsers. Run `pnpm install` and `pnpm dev`. Validate with `pnpm codex:forge:dry`, `pnpm lint`, and `pnpm test`. Judges can use the complete public browser path without rebuilding or signing in. The optional model-assisted path uses an authenticated Codex session and `pnpm codex:forge -- examples/forge-input.json`.
+- **Field 27945 - Submitter Type:** Individual
+- **Field 27946 - Country of Residence:** United States
+- **Field 27947 - Category:** Developer Tools
+- **Field 27948 - Repository URL:** https://github.com/seemorecodez/panurgic-flow
+- **Field 27949 - Project/test URL and instructions:** Public demo: https://codex-flight-recorder.seemoreas0-0.chatgpt.site. No login, API key, or model quota is required. Click **Load sample**, review the parser preview, select **Normalize recognized evidence**, click **Build evidence packet**, inspect the manifest and claim-to-source ledger, review the four artifacts, and seal the V1 packet. Re-import the sealed packet to confirm that its integrity state is **Verified**. The optional Codex companion is documented in the repository README.
+- **Field 27950 - Primary `/feedback` Session ID:** **OWNER ACTION - paste the value returned by `/feedback` in the current primary build task. Do not substitute a Codex task ID or SDK thread ID.**
+- **Field 27951 - Developer-tool installation, platforms, and testing:** Requires Node.js 22.13+ and pnpm 11. Local development supports Windows, macOS, and Linux; the hosted product supports current desktop and mobile browsers. Run `pnpm install --frozen-lockfile` and `pnpm dev`. Validate with `pnpm codex:forge:dry`, `pnpm lint`, and `pnpm test`. The complete public browser workflow works without rebuilding or signing in. The optional model-assisted path uses an authenticated Codex session and `pnpm codex:forge -- examples/forge-input.json`.

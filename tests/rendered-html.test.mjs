@@ -108,13 +108,14 @@ test("Codex CLI exposes help, version, validation, and secure dry-run behavior",
 });
 
 test("documents and enforces the local-first V1 architecture", async () => {
-  const [readme, workspace, contract, storage, forge, worker, packageText] = await Promise.all([
+  const [readme, workspace, contract, storage, forge, worker, privacy, packageText] = await Promise.all([
     readFile(new URL("../README.md", import.meta.url), "utf8"),
     readFile(new URL("../app/_components/panurgic-workspace.tsx", import.meta.url), "utf8"),
     readFile(new URL("../lib/panurgic-contract.mjs", import.meta.url), "utf8"),
     readFile(new URL("../lib/panurgic-storage.mjs", import.meta.url), "utf8"),
     readFile(new URL("../scripts/panurgic-forge.mjs", import.meta.url), "utf8"),
     readFile(new URL("../worker/index.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/privacy/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../package.json", import.meta.url), "utf8"),
   ]);
   const packageJson = JSON.parse(packageText);
@@ -130,13 +131,30 @@ test("documents and enforces the local-first V1 architecture", async () => {
   assert.match(workspace, /file\.size > MAX_PACKET_BYTES/);
   assert.match(workspace, /verifyPacketIntegrity/);
   assert.match(workspace, /maxLength=\{MAX_RAW_EVIDENCE_LENGTH\}/);
+  for (const artifactLabel of [
+    "Implementation summary",
+    "Stakeholder walkthrough",
+    "Verification runbook",
+    "Codex workflow skill",
+  ]) {
+    assert.match(workspace, new RegExp(artifactLabel, "i"));
+  }
+  assert.doesNotMatch(workspace, /\bfetch\s*\(|XMLHttpRequest|sendBeacon|WebSocket/);
+  assert.doesNotMatch(workspace, /OPENAI_API_KEY|CODEX_API_KEY/);
   assert.match(forge, /model: MODEL/);
   assert.match(forge, /sandboxMode: "read-only"/);
   assert.match(forge, /approvalPolicy: "never"/);
   assert.match(forge, /networkAccessEnabled: false/);
   assert.match(forge, /webSearchMode: "disabled"/);
+  assert.match(forge, /buildBrowserPacket/);
+  assert.doesNotMatch(forge, /claimLedger:\s*\[\]/);
   assert.match(worker, /Content-Security-Policy/);
+  assert.match(privacy, /no visitor analytics/i);
   assert.equal(packageJson.dependencies["@openai/codex-sdk"], "0.144.5");
+  const allDependencies = { ...packageJson.dependencies, ...packageJson.devDependencies };
+  for (const analyticsPackage of ["@sentry/nextjs", "@vercel/analytics", "mixpanel", "posthog-js", "segment"]) {
+    assert.equal(allDependencies[analyticsPackage], undefined);
+  }
   assert.equal(packageJson.dependencies["drizzle-orm"], undefined);
   await assert.rejects(access(new URL("../app/api/generate/route.ts", import.meta.url)));
   await assert.rejects(access(new URL("../app/chatgpt-auth.ts", import.meta.url)));

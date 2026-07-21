@@ -23,6 +23,14 @@ Panurgic Flow deliberately separates its public and trusted execution paths:
 
 The public Cloudflare Worker adds a restrictive content security policy, frame denial, MIME sniffing protection, a no-referrer policy, and a permissions policy. `/api/generate` intentionally does not exist.
 
+## Codex, GPT-5.6, and human decisions
+
+Codex was the primary implementation partner for the product architecture, interface refactor, test design, accessibility checks, security hardening, documentation, and deployment preparation. Those contributions are inspectable in the repository and are verified by the commands in this README.
+
+The optional trusted companion pins `gpt-5.6-sol` through `@openai/codex-sdk`. It converts a bounded forge request into structured `PanurgicPacketV1` output while using a read-only sandbox, denying approvals, and disabling network access and web search. The hosted website does not run this model or expose a credential.
+
+The human entrant selected the product problem and Developer Tools audience, named Panurgic Flow, established the local/public trust boundary, chose the evidence and artifact model, and remains responsible for reviewing every final claim. A valid seal proves that a packet has not changed after sealing; it does not prove that the underlying evidence is true.
+
 ## PanurgicPacketV1
 
 Current exports use:
