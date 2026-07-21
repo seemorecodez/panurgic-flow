@@ -22,7 +22,7 @@ Submission deadline: **July 21, 2026 at 5:00 PM Pacific Time / 8:00 PM Eastern T
 - [x] Public source repository: https://github.com/seemorecodez/panurgic-flow
 - [x] Public hosted demo: https://codex-flight-recorder.seemoreas0-0.chatgpt.site
 - [x] Signed-out HTTP checks return 200 for the repository and demo, with no login screen.
-- [ ] Import and verify a fresh `codex-sdk · gpt-5.6-sol` packet during final authenticated testing.
+- [x] Import and verify a fresh `codex-sdk · gpt-5.6-sol` packet during final authenticated testing.
 
 ## Demo video
 
@@ -59,4 +59,4 @@ Submission deadline: **July 21, 2026 at 5:00 PM Pacific Time / 8:00 PM Eastern T
 - [x] Product name is **Panurgic Flow** throughout the app and current documentation; the immutable Devpost slug `astro-flow` is accepted.
 - [x] Complete validation suite rerun after the final documentation and test changes: 16 tests, production build, lint, dry forge, authenticated forge, integrity verification, live smoke, and secret scan pass.
 - [ ] Publish the approved synchronized Devpost description, then confirm all live claims match `CLAIMS_MATRIX.md`.
-- [ ] Recheck official rules and organizer announcements immediately before submission.
+- [x] Recheck official rules and organizer announcements immediately before submission on July 21.
