@@ -43,11 +43,12 @@ Submission deadline: **July 21, 2026 at 5:00 PM Pacific Time / 8:00 PM Eastern T
 - [x] Repository URL prepared: https://github.com/seemorecodez/panurgic-flow
 - [x] Public demo URL and exact testing instructions are drafted in `DEVPOST_SUBMISSION.md`.
 - [x] Direct YouTube watch URL prepared: https://www.youtube.com/watch?v=r3e1KMz23B0
+- [x] Direct YouTube watch URL attached to the live Devpost project.
 - [ ] Obtain the `/feedback` Session ID from this primary Codex task.
 - [x] Developer-tool installation, supported-platform, and testing text is drafted.
 - [x] No team invitations are required for an Individual submission.
 - [ ] Entrant approves the first-person project description.
-- [ ] Publish the approved project description and attach the video in Devpost.
+- [ ] Publish the entrant-approved project description in Devpost.
 - [ ] Submit the project and verify **Submitted** with a non-null submission timestamp.
 
 ## Final integrity check
