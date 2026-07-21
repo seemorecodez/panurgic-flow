@@ -1,9 +1,12 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  createSigningIdentity,
   isPanurgicPacketV1,
   normalizePacket,
   sealPacket,
+  signPacket,
+  signingKeyFingerprint,
   stableStringify,
   verifyPacketIntegrity,
 } from "../lib/panurgic-contract.mjs";
@@ -53,7 +56,7 @@ test("builds deterministic V1 content for fixed identity and time", () => {
   ]);
   assert.ok(first.artifacts.verificationRunbook.includes("verification runbook"));
   assert.equal("judgeRunbook" in first.artifacts, false);
-  assert.ok(first.claimLedger.every(({ status }) => status === "grounded" || status === "review"));
+  assert.ok(first.claimLedger.every(({ status }) => status === "grounded"));
   const reviewPacket = buildBrowserPacket(
     {
       ...SAMPLE_FORM,
@@ -71,9 +74,10 @@ test("builds deterministic V1 content for fixed identity and time", () => {
 
 test("canonical JSON is stable across object insertion order", () => {
   assert.equal(stableStringify({ b: 2, a: { d: 4, c: 3 } }), stableStringify({ a: { c: 3, d: 4 }, b: 2 }));
+  assert.equal(stableStringify({ ä: 3, a: 2, Z: 1 }), '{"Z":1,"a":2,"ä":3}');
 });
 
-test("seals, verifies, and detects a modified packet", async () => {
+test("distinguishes checksums from signatures and detects signed-content modification", async () => {
   const packet = buildBrowserPacket(SAMPLE_FORM, {
     packetId: "packet-integrity",
     createdAt: "2026-07-19T00:00:00.000Z",
@@ -82,10 +86,47 @@ test("seals, verifies, and detects a modified packet", async () => {
   assert.equal((await verifyPacketIntegrity(packet)).status, "unsigned");
   const sealed = await sealPacket(packet);
   assert.match(sealed.integrity.digest, /^[a-f0-9]{64}$/);
-  assert.equal((await verifyPacketIntegrity(sealed)).status, "verified");
-  const modified = structuredClone(sealed);
+  assert.equal((await verifyPacketIntegrity(sealed)).status, "checksum");
+
+  const identity = await createSigningIdentity();
+  assert.equal(identity.privateKey.extractable, false);
+  assert.match(identity.fingerprint, /^[a-f0-9]{64}$/);
+  assert.equal(await signingKeyFingerprint(identity.publicKeyJwk), identity.fingerprint);
+  const signed = await signPacket(packet, identity);
+  assert.match(signed.attestation.signature, /^[A-Za-z0-9_-]+$/);
+  const verified = await verifyPacketIntegrity(signed);
+  assert.equal(verified.status, "attested");
+  assert.equal(verified.signerFingerprint, identity.fingerprint);
+
+  const missingChecksum = structuredClone(signed);
+  delete missingChecksum.integrity;
+  assert.equal((await verifyPacketIntegrity(missingChecksum)).status, "modified");
+
+  const modified = structuredClone(signed);
   modified.project.name = "Changed after sealing";
+  const resealed = await sealPacket(modified);
+  modified.integrity = resealed.integrity;
   assert.equal((await verifyPacketIntegrity(modified)).status, "modified");
+
+  const differentIdentity = await createSigningIdentity();
+  const independentlySigned = await signPacket(
+    { ...packet, project: { ...packet.project, name: "Different signer" } },
+    differentIdentity,
+  );
+  assert.equal((await verifyPacketIntegrity(independentlySigned)).status, "attested");
+  assert.notEqual(independentlySigned.attestation.keyFingerprint, identity.fingerprint);
+
+  const reviewPacket = buildBrowserPacket(
+    {
+      ...SAMPLE_FORM,
+      rawEvidence: "COMMIT: x",
+      technicalProof: "x",
+      codexNotes: "x",
+      workflow: "x",
+    },
+    { packetId: "packet-review", createdAt: packet.createdAt, now: packet.updatedAt },
+  );
+  await assert.rejects(signPacket(reviewPacket, identity), /Resolve every Review claim/i);
 });
 
 test("migrates legacy artifact names without modifying the source object", () => {

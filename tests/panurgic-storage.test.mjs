@@ -42,6 +42,11 @@ test("memory fallback retains bounded projects and versions", async () => {
   try {
     const storage = await loadFreshStorage("memory");
     await storage.clearProjects();
+    const firstIdentity = await storage.getOrCreateSigningIdentity();
+    const secondIdentity = await storage.getOrCreateSigningIdentity();
+    assert.equal(firstIdentity.mode, "memory");
+    assert.equal(firstIdentity.identity.fingerprint, secondIdentity.identity.fingerprint);
+    assert.equal(firstIdentity.identity.privateKey.extractable, false);
     for (let index = 0; index < storage.MAX_SAVED_PROJECTS + 2; index += 1) {
       await storage.saveProject(projectFixture(index));
     }
@@ -82,6 +87,9 @@ test("IndexedDB persists, reloads, trims, and deletes projects and versions", as
   try {
     const storage = await loadFreshStorage("indexeddb");
     await storage.clearProjects();
+    const firstIdentity = await storage.getOrCreateSigningIdentity();
+    assert.equal(firstIdentity.mode, "indexeddb");
+    assert.equal(firstIdentity.identity.privateKey.extractable, false);
     for (let index = 0; index < storage.MAX_SAVED_PROJECTS + 2; index += 1) {
       assert.equal((await storage.saveProject(projectFixture(index))).mode, "indexeddb");
     }
@@ -105,12 +113,16 @@ test("IndexedDB persists, reloads, trims, and deletes projects and versions", as
     assert.equal((await storage.listVersions(projectId)).versions.length, storage.MAX_VERSIONS_PER_PROJECT);
 
     const reloaded = await loadFreshStorage("indexeddb-reload");
+    const persistedIdentity = await reloaded.getOrCreateSigningIdentity();
+    assert.equal(persistedIdentity.identity.fingerprint, firstIdentity.identity.fingerprint);
     assert.equal((await reloaded.listProjects()).projects.length, storage.MAX_SAVED_PROJECTS);
     assert.equal((await reloaded.listVersions(projectId)).versions.length, storage.MAX_VERSIONS_PER_PROJECT);
     await reloaded.deleteProject(projectId);
     assert.equal((await reloaded.listVersions(projectId)).versions.length, 0);
     assert.equal((await reloaded.listProjects()).projects.some((project) => project.id === projectId), false);
     await reloaded.clearProjects();
+    const replacementIdentity = await reloaded.getOrCreateSigningIdentity();
+    assert.notEqual(replacementIdentity.identity.fingerprint, firstIdentity.identity.fingerprint);
   } finally {
     restoreIndexedDb(original);
   }

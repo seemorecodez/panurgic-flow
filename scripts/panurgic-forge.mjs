@@ -1,7 +1,8 @@
 import { Codex } from "@openai/codex-sdk";
-import { mkdir, readFile, realpath, writeFile } from "node:fs/promises";
-import { basename, dirname, relative, resolve } from "node:path";
+import { mkdir, mkdtemp, readFile, realpath, rm, writeFile } from "node:fs/promises";
+import { basename, dirname, join, relative, resolve } from "node:path";
 import process from "node:process";
+import { tmpdir } from "node:os";
 import {
   FORGE_REQUEST_KIND,
   isPanurgicPacketV1,
@@ -14,7 +15,26 @@ const CLI_VERSION = "0.2.0";
 const DEFAULT_INPUT = "examples/forge-input.json";
 const DEFAULT_OUTPUT = "outputs/panurgic-codex-packet.json";
 const MAX_REQUEST_BYTES = 128 * 1024;
-const BLOCKED_CREDENTIAL_VARIABLES = new Set(["OPENAI_API_KEY", "CODEX_API_KEY"]);
+const ALLOWED_CODEX_ENVIRONMENT = new Set([
+  "APPDATA",
+  "CODEX_HOME",
+  "COMSPEC",
+  "HOME",
+  "LANG",
+  "LC_ALL",
+  "LOCALAPPDATA",
+  "PATH",
+  "Path",
+  "PATHEXT",
+  "SSL_CERT_DIR",
+  "SSL_CERT_FILE",
+  "SYSTEMROOT",
+  "SystemRoot",
+  "TEMP",
+  "TMP",
+  "USERPROFILE",
+  "WINDIR",
+]);
 
 const ARTIFACT_SCHEMA = {
   type: "object",
@@ -141,7 +161,7 @@ ${evidenceJson}
 function buildCodexEnvironment() {
   return Object.fromEntries(
     Object.entries(process.env).filter(
-      ([name, value]) => value !== undefined && !BLOCKED_CREDENTIAL_VARIABLES.has(name),
+      ([name, value]) => value !== undefined && ALLOWED_CODEX_ENVIRONMENT.has(name),
     ),
   );
 }
@@ -196,16 +216,23 @@ async function main() {
     return;
   }
 
+  const isolatedWorkspace = await mkdtemp(join(tmpdir(), "panurgic-flow-codex-"));
   const codex = new Codex({ env: buildCodexEnvironment() });
-  const thread = codex.startThread({
-    model: MODEL,
-    sandboxMode: "read-only",
-    workingDirectory: workspace,
-    approvalPolicy: "never",
-    networkAccessEnabled: false,
-    webSearchMode: "disabled",
-  });
-  const turn = await thread.run(buildPrompt(request), { outputSchema: ARTIFACT_SCHEMA });
+  let thread;
+  let turn;
+  try {
+    thread = codex.startThread({
+      model: MODEL,
+      sandboxMode: "read-only",
+      workingDirectory: isolatedWorkspace,
+      approvalPolicy: "never",
+      networkAccessEnabled: false,
+      webSearchMode: "disabled",
+    });
+    turn = await thread.run(buildPrompt(request), { outputSchema: ARTIFACT_SCHEMA });
+  } finally {
+    await rm(isolatedWorkspace, { recursive: true, force: true });
+  }
   const artifact = JSON.parse(turn.finalResponse);
   const preserved = normalizedEvidence(request);
   const now = new Date().toISOString();

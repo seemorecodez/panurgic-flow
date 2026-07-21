@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 
 const title = "Panurgic Flow";
 const description =
-  "Turn AI-assisted development records into grounded claims, verifiable artifacts, and tamper-evident packets without uploading project data.";
+  "Turn AI-assisted development records into source-linked claims, verifiable artifacts, and digitally signed packets without uploading project data.";
 
 export async function generateMetadata(): Promise<Metadata> {
   const requestHeaders = await headers();

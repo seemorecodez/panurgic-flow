@@ -1,6 +1,6 @@
 # Panurgic Flow
 
-Panurgic Flow turns AI-assisted development records into grounded claims, reusable workflow artifacts, and tamper-evident evidence packets.
+Panurgic Flow turns AI-assisted development records into source-linked claims, reusable workflow artifacts, and digitally signed evidence packets.
 
 - **Product:** [codex-flight-recorder.seemoreas0-0.chatgpt.site](https://codex-flight-recorder.seemoreas0-0.chatgpt.site)
 - **Source:** [seemorecodez/panurgic-flow](https://github.com/seemorecodez/panurgic-flow)
@@ -10,7 +10,7 @@ Panurgic Flow turns AI-assisted development records into grounded claims, reusab
 
 1. **Capture:** create a device-local project, paste prefixed repository and agent evidence, and preview recognized or unrecognized lines.
 2. **Review:** build a deterministic packet, inspect its manifest, and trace generated claims to the strongest supplied sources.
-3. **Export:** copy or download artifacts, seal the complete V1 packet with SHA-256, and re-import it to verify that it has not changed.
+3. **Export:** copy or download artifacts, sign the complete V1 packet with ECDSA P-256, and re-import it to verify both the signature and signer fingerprint.
 
 The hosted product has no account, visitor analytics, API key, or model-generation endpoint. Up to 25 projects and ten recent packet versions per project are stored in IndexedDB on the current device. If persistent browser storage is unavailable, the product falls back to session memory and displays a warning.
 
@@ -18,7 +18,7 @@ The hosted product has no account, visitor analytics, API key, or model-generati
 
 Panurgic Flow deliberately separates its public and trusted execution paths:
 
-- **Browser-local product:** evidence parsing, deterministic generation, claim mapping, project history, artifact export, canonical JSON sealing, and verification happen in the browser.
+- **Browser-local product:** evidence parsing, deterministic generation, claim mapping, project history, artifact export, SHA-256 checksums, ECDSA signing, and verification happen in the browser.
 - **Trusted Codex companion:** an optional local CLI uses `@openai/codex-sdk` with `gpt-5.6-sol`. It runs with a read-only sandbox, no approvals, disabled network access, disabled web search, and strict structured output.
 
 The public Cloudflare Worker adds a restrictive content security policy, frame denial, MIME sniffing protection, a no-referrer policy, and a permissions policy. `/api/generate` intentionally does not exist.
@@ -29,7 +29,7 @@ Codex was the primary implementation partner for the product architecture, inter
 
 The optional trusted companion pins `gpt-5.6-sol` through `@openai/codex-sdk`. It converts a bounded forge request into structured `PanurgicPacketV1` output while using a read-only sandbox, denying approvals, and disabling network access and web search. The hosted website does not run this model or expose a credential.
 
-The human entrant selected the product problem and Developer Tools audience, named Panurgic Flow, established the local/public trust boundary, chose the evidence and artifact model, and remains responsible for reviewing every final claim. A valid seal proves that a packet has not changed after sealing; it does not prove that the underlying evidence is true.
+The human entrant selected the product problem and Developer Tools audience, named Panurgic Flow, established the local/public trust boundary, chose the evidence and artifact model, and remains responsible for reviewing every final claim. A valid signature proves private-key control and unchanged packet bytes. It does not prove that the underlying evidence is true, and the displayed fingerprint identifies a person only when it is compared through an independent trusted channel.
 
 ## PanurgicPacketV1
 
@@ -42,7 +42,9 @@ Current exports use:
 }
 ```
 
-The full contract contains project context, normalized evidence, provenance, the manifest, four artifacts, the claim ledger, timestamps, and optional integrity metadata. Sealing hashes deterministic canonical JSON with SHA-256. Imports are classified as `verified`, `unsigned`, or `modified` after recomputation.
+The full contract contains project context, normalized evidence, provenance, the manifest, four artifacts, the claim ledger, timestamps, SHA-256 integrity metadata, and an optional ECDSA P-256 attestation. Imports are classified as `attested`, `checksum`, `unsigned`, or `modified` after checksum and signature verification.
+
+The browser creates a device signing identity only when the user signs a packet. Its private key is imported as a non-extractable `CryptoKey` and stored in IndexedDB; only the public key and SHA-256 signer fingerprint are embedded in the packet. A checksum-only packet is never presented as signer verification.
 
 Legacy unversioned Panurgic Flow packets remain importable. They are normalized to V1 in memory, including migration from `judgeRunbook` to `verificationRunbook`, without changing the original file.
 
@@ -85,9 +87,22 @@ The default output is `outputs/panurgic-codex-packet.json`. The CLI refuses to o
 ```bash
 pnpm lint
 pnpm test
+pnpm proof:validate
 ```
 
-The suite covers parsing, deterministic generation, V1 validation, legacy migration, canonicalization, integrity verification, bounded project/version storage, secure CLI behavior, public routes, security headers, accessibility structure, bundle size, and removal of the hosted generation route.
+The suite covers parsing, deterministic generation, V1 validation, legacy migration, canonicalization, checksum/signature separation, valid and adversarial ECDSA verification, non-extractable key persistence, bounded project/version storage, secure CLI behavior, public routes, security headers, accessibility structure, bundle size, and removal of the hosted generation route.
+
+## Cryptographic release provenance
+
+`proof/panurgic-flow-release-claims.json` is the machine-readable public claim set. `.github/workflows/release-trust.yml` performs locked installation, dry forge validation, lint, tests, production build, secret scanning, and claim-contract validation before `actions/attest` attaches GitHub OIDC and Sigstore provenance to that exact file.
+
+After the public workflow succeeds, independently verify repository identity, workflow identity, commit provenance, and the artifact digest with:
+
+```bash
+gh attestation verify proof/panurgic-flow-release-claims.json --repo seemorecodez/panurgic-flow
+```
+
+The attestation proves artifact provenance; the public source, tests, workflow, signer fingerprint, and stated limitations remain the evidence for deciding whether to trust each semantic claim.
 
 After deployment, run the signed-out production smoke test:
 
@@ -111,11 +126,13 @@ Read the live [privacy](https://codex-flight-recorder.seemoreas0-0.chatgpt.site/
 
 ```text
 app/                         public product, routes, and error boundaries
-lib/panurgic-contract.mjs    shared V1 contract, migration, sealing, verification
+lib/panurgic-contract.mjs    shared V1 contract, migration, checksum, signing, verification
 lib/panurgic-core.mjs        deterministic evidence parser and artifact generator
 lib/panurgic-storage.mjs     bounded IndexedDB storage with memory fallback
 scripts/panurgic-forge.mjs   secure local Codex companion
 tests/                       domain, storage, route, security, and release checks
+proof/                       machine-readable public release claims
+.github/workflows/           locked verification and GitHub/Sigstore attestation
 docs/submission/             time-bound submission documentation and research
 ```
 

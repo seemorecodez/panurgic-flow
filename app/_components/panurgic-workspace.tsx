@@ -17,7 +17,7 @@ import {
   MAX_PROJECT_NAME_LENGTH,
   MAX_RAW_EVIDENCE_LENGTH,
   normalizePacket,
-  sealPacket,
+  signPacket,
   verifyPacketIntegrity,
 } from "@/lib/panurgic-contract.mjs";
 import type {
@@ -37,6 +37,7 @@ import {
   AUTOSAVE_DELAY_MS,
   clearProjects,
   deleteProject,
+  getOrCreateSigningIdentity,
   listProjects,
   listVersions,
   saveProject,
@@ -105,7 +106,8 @@ function formatTimestamp(value: string) {
 
 function IntegrityBadge({ status }: { status: IntegrityStatus }) {
   const labels: Record<IntegrityStatus, string> = {
-    verified: "Verified fingerprint",
+    attested: "Signature valid",
+    checksum: "Checksum matched",
     unsigned: "Unsigned packet",
     modified: "Modified packet",
   };
@@ -287,7 +289,7 @@ export function PanurgicWorkspace() {
     setProjects([]);
     setConfirmClear(false);
     createBlankProject();
-    setStatusMessage("All Panurgic Flow data was cleared from this device.");
+    setStatusMessage("Projects, versions, and the device signing identity were cleared.");
   }
 
   async function exportCurrentProject() {
@@ -347,7 +349,7 @@ export function PanurgicWorkspace() {
     });
     setStorageMode(storageResult.mode);
     await refreshProjects(projectId);
-    setStatusMessage("Evidence packet built locally. Review its claims before sealing.");
+    setStatusMessage("Evidence packet built locally. Review every claim before signing.");
     window.setTimeout(() => headingRef.current?.focus(), 0);
   }
 
@@ -449,26 +451,31 @@ export function PanurgicWorkspace() {
     setStatusMessage(`${artifactLabels[activeArtifact]} downloaded.`);
   }
 
-  async function sealAndDownload() {
+  async function signAndDownload() {
     if (!packet) return;
     try {
-      const sealed = await sealPacket(packet);
-      const verification = await verifyPacketIntegrity(sealed);
-      setPacket(sealed);
+      const signing = await getOrCreateSigningIdentity();
+      setStorageMode(signing.mode);
+      const signed = await signPacket(packet, signing.identity);
+      const verification = await verifyPacketIntegrity(signed);
+      if (verification.status !== "attested") {
+        throw new Error("The new signature did not pass independent verification.");
+      }
+      setPacket(signed);
       setIntegrityStatus(verification.status);
-      downloadJson("panurgic-flow-evidence-packet.json", sealed);
+      downloadJson("panurgic-flow-evidence-packet.json", signed);
       if (currentProjectId) {
         await saveVersion({
           id: newId("version"),
           projectId: currentProjectId,
           createdAt: new Date().toISOString(),
-          packet: sealed,
+          packet: signed,
         });
         await refreshProjects(currentProjectId);
       }
-      setStatusMessage("Packet sealed and verified. Keep the fingerprint with the exported file.");
-    } catch {
-      setStatusMessage("This browser could not seal the packet. Try a current browser.");
+      setStatusMessage("Packet signed and independently verified. Share the signer fingerprint through a trusted channel.");
+    } catch (error) {
+      setStatusMessage(error instanceof Error ? error.message : "This browser could not sign the packet.");
     }
   }
 
@@ -505,7 +512,7 @@ export function PanurgicWorkspace() {
             <h1>Turn AI-assisted work into evidence you can verify.</h1>
             <p className="hero-lede">
               Capture development records, trace generated claims to their sources,
-              and export tamper-evident packets without uploading project data.
+              and export digitally signed packets without uploading project data.
             </p>
             <div className="hero-actions">
               <a className="primary-action" href="#workspace">Start a local project</a>
@@ -524,7 +531,7 @@ export function PanurgicWorkspace() {
             <div className="terminal-bar"><span /><span /><span /><small>panurgic-flow.run</small></div>
             <div className="flow-step"><small>01 · Capture</small><strong>Normalize multi-agent evidence</strong></div>
             <div className="flow-step"><small>02 · Review</small><strong>Trace claims to supplied sources</strong></div>
-            <div className="flow-step"><small>03 · Export</small><strong>Seal and verify portable packets</strong></div>
+            <div className="flow-step"><small>03 · Export</small><strong>Sign and verify portable packets</strong></div>
           </div>
         </div>
       </section>
@@ -532,7 +539,7 @@ export function PanurgicWorkspace() {
       <section className="principles" aria-label="Trust model">
         <article><small>Execution</small><strong>Local-first</strong><p>The hosted workflow runs in your browser.</p></article>
         <article><small>Grounding</small><strong>Traceable</strong><p>Claims point back to supplied evidence.</p></article>
-        <article><small>Integrity</small><strong>Verifiable</strong><p>SHA-256 exposes changes after sealing.</p></article>
+        <article><small>Integrity</small><strong>Signed</strong><p>ECDSA P-256 proves key control and unchanged packet bytes.</p></article>
         <article><small>Control</small><strong>Human-reviewed</strong><p>You decide what becomes part of the record.</p></article>
       </section>
 
@@ -585,7 +592,7 @@ export function PanurgicWorkspace() {
             <div className="clear-local">
               {confirmClear ? (
                 <div className="confirm-row">
-                  <button className="danger" type="button" onClick={removeAllProjects}>Clear all</button>
+                  <button className="danger" type="button" onClick={removeAllProjects}>Clear all + signer</button>
                   <button type="button" onClick={() => setConfirmClear(false)}>Cancel</button>
                 </div>
               ) : (
@@ -711,6 +718,14 @@ export function PanurgicWorkspace() {
                 <article><small>Audience</small><strong>{packet.manifest.audience}</strong></article>
                 <article><small>Source</small><strong>{packet.source.type}{packet.source.model ? ` · ${packet.source.model}` : ""}</strong></article>
               </div>
+              {packet.attestation && (
+                <div className="signature-proof">
+                  <strong>ECDSA P-256 signature verified</strong>
+                  <span>Signer fingerprint</span>
+                  <code>{packet.attestation.keyFingerprint}</code>
+                  <p>Compare this fingerprint through an independent trusted channel to establish signer identity.</p>
+                </div>
+              )}
               <div className="evidence-lists">
                 <article><h3>Evidence</h3><ul>{packet.manifest.evidence.map((entry) => <li key={entry}>{entry}</li>)}</ul></article>
                 <article><h3>Risks</h3><ul>{packet.manifest.risks.map((entry) => <li key={entry}>{entry}</li>)}</ul></article>
@@ -769,15 +784,16 @@ export function PanurgicWorkspace() {
                 <div className="artifact-actions">
                   <button type="button" onClick={copyArtifact}>{copied ? "Copied" : "Copy artifact"}</button>
                   <button type="button" onClick={downloadArtifact}>Download .md</button>
-                  <button className="seal-button" type="button" onClick={sealAndDownload}>Seal and download packet</button>
+                  <button className="seal-button" type="button" onClick={signAndDownload}>Sign and download packet</button>
                 </div>
-                {packet.integrity && <p className="fingerprint"><span>SHA-256</span><code>{packet.integrity.digest}</code></p>}
+                {packet.attestation && <p className="fingerprint"><span>ECDSA signer fingerprint</span><code>{packet.attestation.keyFingerprint}</code></p>}
+                {packet.integrity && <p className="fingerprint"><span>Content SHA-256</span><code>{packet.integrity.digest}</code></p>}
                 <pre>{packet.artifacts[activeArtifact]}</pre>
               </div>
               {versions.length > 0 && (
                 <div className="version-history">
                   <div><p className="eyebrow">Local history</p><h3>Saved packet versions</h3></div>
-                  <div>{versions.map((version) => <button type="button" key={version.id} onClick={() => openVersion(version)}>{formatTimestamp(version.createdAt)}<span>{version.packet.integrity ? "sealed" : "draft"}</span></button>)}</div>
+                  <div>{versions.map((version) => <button type="button" key={version.id} onClick={() => openVersion(version)}>{formatTimestamp(version.createdAt)}<span>{version.packet.attestation ? "signed" : version.packet.integrity ? "checksum" : "draft"}</span></button>)}</div>
                 </div>
               )}
             </section>
@@ -786,7 +802,7 @@ export function PanurgicWorkspace() {
       </section>
 
       <footer>
-        <div><strong>Panurgic Flow</strong><span>AI-assisted work. Verifiable evidence. Sealed records.</span></div>
+        <div><strong>Panurgic Flow</strong><span>AI-assisted work. Source-linked evidence. Signed records.</span></div>
         <nav aria-label="Footer navigation"><Link href="/docs">Docs</Link><Link href="/privacy">Privacy</Link><Link href="/security">Security</Link><a href="https://github.com/seemorecodez/panurgic-flow">GitHub</a></nav>
       </footer>
     </main>

@@ -13,7 +13,7 @@ export default function DocsPage() {
         <li>Paste evidence using <code>COMMIT:</code>, <code>TEST:</code>, <code>CODEX:</code>, <code>DECISION:</code>, and <code>PATTERN:</code> prefixes.</li>
         <li>Review recognized and unrecognized lines, then build the packet.</li>
         <li>Inspect the claim ledger and resolve anything marked Review.</li>
-        <li>Seal and download the V1 packet. Re-import it whenever you need to verify its fingerprint.</li>
+        <li>Sign and download the V1 packet. Re-import it to verify the ECDSA signature and signer fingerprint.</li>
       </ol>
       <h2>Trusted Codex companion</h2>
       <p>Download a forge request and run <code>pnpm codex:forge -- request.json</code> inside an authenticated Codex environment. The companion is pinned to GPT-5.6, uses a read-only sandbox, disables network access, and returns structured V1 output for import.</p>

@@ -1,0 +1,69 @@
+{
+  "kind": "panurgic-flow/release-claims",
+  "schemaVersion": 1,
+  "product": "Panurgic Flow",
+  "repository": "https://github.com/seemorecodez/panurgic-flow",
+  "liveDemo": "https://codex-flight-recorder.seemoreas0-0.chatgpt.site",
+  "claims": [
+    {
+      "id": "browser-local-processing",
+      "statement": "The hosted workflow processes project evidence locally in the browser and exposes no hosted generation endpoint.",
+      "evidenceFiles": ["app/_components/panurgic-workspace.tsx", "app/privacy/page.tsx", "worker/index.ts"],
+      "verification": ["pnpm test", "pnpm test:smoke"]
+    },
+    {
+      "id": "bounded-device-storage",
+      "statement": "Device-local storage retains at most 25 projects and ten packet versions per project, with a session-memory fallback.",
+      "evidenceFiles": ["lib/panurgic-storage.mjs", "tests/panurgic-storage.test.mjs"],
+      "verification": ["pnpm test:unit"]
+    },
+    {
+      "id": "source-linked-claims",
+      "statement": "Every generated ledger claim retains a supplied source and uncertain mappings remain marked Review.",
+      "evidenceFiles": ["lib/panurgic-core.mjs", "tests/panurgic-core.test.mjs"],
+      "verification": ["pnpm test:unit"]
+    },
+    {
+      "id": "four-artifact-contract",
+      "statement": "Every valid V1 packet contains an implementation summary, stakeholder walkthrough, verification runbook, and Codex workflow skill.",
+      "evidenceFiles": ["lib/panurgic-contract.mjs", "lib/panurgic-core.mjs", "tests/panurgic-core.test.mjs"],
+      "verification": ["pnpm test:unit"]
+    },
+    {
+      "id": "asymmetric-packet-signatures",
+      "statement": "Approved packets can be signed with a non-extractable device ECDSA P-256 key and independently verified from the embedded public key and signer fingerprint.",
+      "evidenceFiles": ["lib/panurgic-contract.mjs", "lib/panurgic-storage.mjs", "tests/panurgic-core.test.mjs", "tests/panurgic-storage.test.mjs"],
+      "verification": ["pnpm test:unit"]
+    },
+    {
+      "id": "checksum-not-identity",
+      "statement": "A matching SHA-256 checksum is classified separately from a valid asymmetric signature and is never presented as signer verification.",
+      "evidenceFiles": ["lib/panurgic-contract.mjs", "app/_components/panurgic-workspace.tsx", "tests/panurgic-core.test.mjs"],
+      "verification": ["pnpm test:unit", "pnpm test"]
+    },
+    {
+      "id": "bounded-codex-companion",
+      "statement": "The optional Codex companion pins gpt-5.6-sol, denies approvals, disables network and web search, filters its environment through an allowlist, and starts in an isolated temporary working directory.",
+      "evidenceFiles": ["scripts/panurgic-forge.mjs", "tests/rendered-html.test.mjs"],
+      "verification": ["pnpm codex:forge:dry", "pnpm test"]
+    },
+    {
+      "id": "public-security-controls",
+      "statement": "Production responses apply CSP, frame denial, MIME-sniffing prevention, a restrictive referrer policy, a permissions policy, and HSTS over HTTPS.",
+      "evidenceFiles": ["worker/index.ts", "tests/rendered-html.test.mjs", "tests/live-smoke.mjs"],
+      "verification": ["pnpm test", "pnpm test:smoke"]
+    },
+    {
+      "id": "reproducible-release-provenance",
+      "statement": "This release-claims artifact is attested only after installation, dry-forge validation, lint, tests, build, secret scanning, and claim-contract validation pass in GitHub Actions.",
+      "evidenceFiles": [".github/workflows/release-trust.yml", "scripts/validate-release-claims.mjs"],
+      "verification": ["pnpm proof:validate", "gh attestation verify proof/panurgic-flow-release-claims.json --repo seemorecodez/panurgic-flow"]
+    }
+  ],
+  "limitations": [
+    "A valid ECDSA signature proves that the packet bytes have not changed since the holder of the corresponding private key signed them.",
+    "A signer fingerprint establishes identity only when the recipient compares it through an independent trusted channel.",
+    "Cryptography does not prove that supplied evidence is semantically true; source review and reproducible tests remain required.",
+    "GitHub artifact attestation proves repository, workflow, commit, and artifact provenance; the public workflow and test implementation remain inspectable inputs to that trust decision."
+  ]
+}

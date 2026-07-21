@@ -1,0 +1,57 @@
+name: Cryptographic release trust
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+  attestations: write
+
+concurrency:
+  group: release-trust-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  attest-release-claims:
+    name: Verify and attest release claims
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out the exact commit
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+
+      - name: Install Node.js 22.13
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 22.13.0
+
+      - name: Activate pinned pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@11.9.0 --activate
+
+      - name: Install locked dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Validate the bounded Codex forge
+        run: pnpm codex:forge:dry
+
+      - name: Lint source
+        run: pnpm lint
+
+      - name: Run tests and production build
+        run: pnpm test
+
+      - name: Scan current files and Git history for secrets
+        run: pnpm security:scan
+
+      - name: Validate the release-claims contract
+        run: pnpm proof:validate
+
+      - name: Create GitHub OIDC and Sigstore provenance
+        uses: actions/attest@f7c74d28b9d84cb8768d0b8ca14a4bac6ef463e6 # v4
+        with:
+          subject-path: proof/panurgic-flow-release-claims.json
