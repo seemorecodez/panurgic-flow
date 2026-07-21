@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 
 const title = "Panurgic Flow";
 const description =
-  "Turn AI-assisted development records into source-linked claims, verifiable artifacts, and digitally signed packets without uploading project data.";
+  "The signed release-evidence layer for AI-assisted software: source-linked claims, reusable artifacts, and locally verifiable packets.";
 
 export async function generateMetadata(): Promise<Metadata> {
   const requestHeaders = await headers();
@@ -65,7 +65,7 @@ export async function generateMetadata(): Promise<Metadata> {
           url: "/og.png",
           width: 1200,
           height: 630,
-          alt: "Panurgic Flow turns AI-assisted work into verifiable evidence.",
+          alt: "Panurgic Flow turns AI-assisted build records into source-linked claims and signed release evidence.",
         },
       ],
     },

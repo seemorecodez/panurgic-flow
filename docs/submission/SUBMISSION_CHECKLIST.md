@@ -34,6 +34,8 @@ Submission deadline: **July 21, 2026 at 5:00 PM Pacific Time / 8:00 PM Eastern T
 - [x] Video shows that the public browser workflow works without account, key, or quota.
 - [x] Video uses original product captures, generated narration, and no unauthorized music.
 - [x] Video is public on YouTube and the direct watch link is verified.
+- [x] Existing 2:46 video remains valid; no replacement upload is required for the positioning and proof-image update.
+- [x] Cryptographic proof screenshot generated at `docs/proof-verified.jpg`; manually add it to the Devpost project gallery.
 
 ## Required Devpost fields
 

@@ -29,9 +29,10 @@ test("server-renders the production product and public routes", async () => {
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
   const html = await response.text();
   assert.match(html, /<title>Panurgic Flow<\/title>/i);
-  assert.match(html, /Turn AI-assisted work into evidence you can verify/i);
+  assert.match(html, /The signed release-evidence layer for AI-assisted software/i);
   assert.match(html, /Start a local project/i);
   assert.match(html, /Device-local history/i);
+  assert.match(html, /Independent packet verification/i);
   assert.match(html, /Capture/);
   assert.match(html, /Review/);
   assert.match(html, /Export/);

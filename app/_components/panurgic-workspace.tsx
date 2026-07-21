@@ -508,11 +508,12 @@ export function PanurgicWorkspace() {
 
         <div className="hero-grid">
           <div className="hero-copy">
-            <p className="eyebrow">Agentic development provenance</p>
-            <h1>Turn AI-assisted work into evidence you can verify.</h1>
+            <p className="eyebrow">Signed release evidence</p>
+            <h1>The signed release-evidence layer for AI-assisted software.</h1>
             <p className="hero-lede">
-              Capture development records, trace generated claims to their sources,
-              and export digitally signed packets without uploading project data.
+              Turn completed multi-agent build records into source-linked claims,
+              four reusable delivery artifacts, and cryptographically verifiable
+              release packets without uploading project data.
             </p>
             <div className="hero-actions">
               <a className="primary-action" href="#workspace">Start a local project</a>
@@ -524,6 +525,7 @@ export function PanurgicWorkspace() {
               <li>No account</li>
               <li>No hosted model endpoint</li>
               <li>Device-local history</li>
+              <li>Independent packet verification</li>
             </ul>
           </div>
 

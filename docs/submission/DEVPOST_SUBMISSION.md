@@ -4,7 +4,7 @@
 
 ## Tagline
 
-Turn multi-agent coding evidence into source-linked claims, signed proof, and a reusable workflow skill.
+Turn AI-assisted build records into source-linked claims, reusable artifacts, and signed release evidence.
 
 ## Category
 
@@ -14,7 +14,7 @@ Developer Tools
 
 ### Inspiration
 
-When I build with AI coding tools, the finished code usually survives, but the evidence behind it does not. Decisions are buried in chat, generated summaries lose their sources, and another person cannot easily tell what was verified. I built Panurgic Flow to preserve that record without forcing developers to install a git hook, upload private project material, or trust a hidden scoring system.
+When I build with AI coding tools, the finished code usually survives, but the evidence behind it does not. Decisions are buried in chat, generated summaries lose their sources, and another person cannot easily tell what was verified. I built Panurgic Flow as the **signed release-evidence layer for AI-assisted software**: the missing final step between completed agent work and a release record another person can inspect. It preserves that record without forcing developers to install a git hook, upload private project material, or trust a hidden scoring system.
 
 ### What I built
 
@@ -29,6 +29,8 @@ The repository also publishes a machine-readable release-claims artifact. A lock
 ### Codex and GPT-5.6
 
 Codex was my primary implementation partner for the architecture, interface refactor, deterministic contract, tests, accessibility checks, security hardening, documentation, and deployment preparation. I chose the product problem, Developer Tools audience, Panurgic Flow name, local/public trust boundary, evidence policy, artifact set, and the final claims that can be shared.
+
+As of the July 21 pre-submission audit, the primary Codex task records at least **7.4 hours of completed Codex execution across 32 turns** within a **69.5-hour elapsed build window**. Human planning, review, recording, and upload time are not instrumented, so I have not invented or added them to the active-hours figure.
 
 The optional trusted companion uses `@openai/codex-sdk` with `gpt-5.6-sol`. It accepts a bounded forge request and returns structured `PanurgicPacketV1` output under a read-only sandbox with approvals denied and network access and web search disabled. Its child environment is reduced through an allowlist and its working directory is an isolated temporary directory. The public website does not run the model, expose an API key, or provide a hosted generation endpoint.
 
@@ -65,6 +67,8 @@ Optional GPT-5.6 Codex path:
 - Channel: https://www.youtube.com/@Panurgic-Flow
 - Runtime: 2:46
 - Narration source: `C:\Users\frank\OneDrive\Documents\Panurgic Flow YouTube Package\NARRATION.md`
+- Replacement required: **No.** The positioning clarifies the shipped workflow, and the new proof screenshot documents the final cryptographic verification state without contradicting the published video.
+- Product image to add: `docs/proof-verified.jpg` (real `Signature valid` state with the ECDSA signer fingerprint and content SHA-256)
 
 ## Final links
 

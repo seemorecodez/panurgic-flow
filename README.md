@@ -1,10 +1,21 @@
 # Panurgic Flow
 
-Panurgic Flow turns AI-assisted development records into source-linked claims, reusable workflow artifacts, and digitally signed evidence packets.
+**Panurgic Flow is the signed release-evidence layer for AI-assisted software.** It turns completed multi-agent build records into source-linked claims, four reusable delivery artifacts, and cryptographically verifiable release packets.
 
 - **Product:** [codex-flight-recorder.seemoreas0-0.chatgpt.site](https://codex-flight-recorder.seemoreas0-0.chatgpt.site)
 - **Source:** [seemorecodez/panurgic-flow](https://github.com/seemorecodez/panurgic-flow)
+- **Published demonstration:** [YouTube - Panurgic Flow (2:46)](https://www.youtube.com/watch?v=r3e1KMz23B0)
 - **License:** MIT
+
+## Its own category: signed release evidence
+
+Most developer tools either control agents while they work or display activity afterward. Panurgic Flow begins at the missing release step. It converts completed work into a portable record whose claims remain source-linked, whose artifacts remain reusable, and whose packet integrity and signer-key continuity can be checked after transfer.
+
+It proves packet bytes and key control without pretending that cryptography proves semantic truth. Human review, exact source evidence, an independently compared signer fingerprint, reproducible tests, and repository provenance remain separate and visible parts of the trust decision.
+
+![Panurgic Flow Signature valid state with ECDSA signer fingerprint and content SHA-256](docs/proof-verified.jpg)
+
+The screenshot is a real browser-local signed packet. Tampered signed packets are classified as `modified` by the same import path; adversarial digest, signature, and signer-fingerprint cases are covered by `tests/panurgic-core.test.mjs`.
 
 ## Product workflow
 
@@ -30,6 +41,12 @@ Codex was the primary implementation partner for the product architecture, inter
 The optional trusted companion pins `gpt-5.6-sol` through `@openai/codex-sdk`. It converts a bounded forge request into structured `PanurgicPacketV1` output while using a read-only sandbox, denying approvals, and disabling network access and web search. The hosted website does not run this model or expose a credential.
 
 The human entrant selected the product problem and Developer Tools audience, named Panurgic Flow, established the local/public trust boundary, chose the evidence and artifact model, and remains responsible for reviewing every final claim. A valid signature proves private-key control and unchanged packet bytes. It does not prove that the underlying evidence is true, and the displayed fingerprint identifies a person only when it is compared through an independent trusted channel.
+
+### Recorded build effort
+
+- **Recorded Codex execution:** at least **7.4 hours** across 32 completed turns in the primary task as of the July 21 pre-submission audit.
+- **Elapsed build window:** **69.5 hours** from primary-task creation to that audit.
+- **Measurement boundary:** human planning, review, recording, upload time, and the still-running final turn are not instrumented, so they are not fabricated or added to the active-hours figure.
 
 ## PanurgicPacketV1
 
