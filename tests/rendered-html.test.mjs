@@ -157,6 +157,7 @@ test("documents and enforces the local-first signed V1 architecture", async () =
   assert.match(forge, /ALLOWED_CODEX_ENVIRONMENT/);
   assert.match(forge, /mkdtemp/);
   assert.match(forge, /workingDirectory: isolatedWorkspace/);
+  assert.match(forge, /skipGitRepoCheck: true/);
   assert.doesNotMatch(forge, /workingDirectory: workspace/);
   assert.match(forge, /buildBrowserPacket/);
   assert.doesNotMatch(forge, /claimLedger:\s*\[\]/);

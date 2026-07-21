@@ -225,6 +225,7 @@ async function main() {
       model: MODEL,
       sandboxMode: "read-only",
       workingDirectory: isolatedWorkspace,
+      skipGitRepoCheck: true,
       approvalPolicy: "never",
       networkAccessEnabled: false,
       webSearchMode: "disabled",
