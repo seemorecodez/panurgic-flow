@@ -4,9 +4,10 @@ const base = process.env.PANURGIC_LIVE_URL ?? "https://codex-flight-recorder.see
 const home = await fetch(base, { redirect: "follow" });
 assert.equal(home.status, 200);
 const html = await home.text();
-assert.match(html, /Turn AI-assisted work into evidence you can verify/i);
+assert.match(html, /The signed release-evidence layer for AI-assisted software/i);
 assert.match(html, /Start a local project/i);
-assert.match(html, /Device-local history/i);
+assert.match(html, /Portable evidence continuity/i);
+assert.match(html, /Import agent transcript/i);
 assert.doesNotMatch(html, /OpenAI Build Week|Devpost|Wow factor|Owner action|judge-ready|product roadmap/i);
 assert.equal(home.headers.get("x-content-type-options"), "nosniff");
 assert.match(home.headers.get("content-security-policy") ?? "", /frame-ancestors 'none'/i);

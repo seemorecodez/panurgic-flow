@@ -42,6 +42,18 @@
       "verification": ["pnpm test:unit", "pnpm test"]
     },
     {
+      "id": "bounded-transcript-recovery",
+      "statement": "Agent transcripts are parsed locally through bounded, versioned adapters with explicit skipped-line diagnostics and best-effort credential, identity, and path redaction.",
+      "evidenceFiles": ["lib/panurgic-transcript.mjs", "app/_components/panurgic-workspace.tsx", "tests/panurgic-continuity.test.mjs"],
+      "verification": ["pnpm test:unit", "pnpm test"]
+    },
+    {
+      "id": "portable-evidence-continuity",
+      "statement": "Project exports preserve packet ordering in a bounded SHA-256 hash chain, sign the complete archive with ECDSA P-256, and can be restored locally or verified without network access through human or JSON CLI output.",
+      "evidenceFiles": ["lib/panurgic-continuity.mjs", "scripts/panurgic-verify.mjs", "tests/panurgic-continuity.test.mjs"],
+      "verification": ["pnpm test:unit", "pnpm panurgic:verify -- --help"]
+    },
+    {
       "id": "bounded-codex-companion",
       "statement": "The optional Codex companion pins gpt-5.6-sol, denies approvals, disables network and web search, filters its environment through an allowlist, and starts in an isolated temporary working directory.",
       "evidenceFiles": ["scripts/panurgic-forge.mjs", "tests/rendered-html.test.mjs"],
@@ -64,6 +76,8 @@
     "A valid ECDSA signature proves that the packet bytes have not changed since the holder of the corresponding private key signed them.",
     "A signer fingerprint establishes identity only when the recipient compares it through an independent trusted channel.",
     "Cryptography does not prove that supplied evidence is semantically true; source review and reproducible tests remain required.",
+    "Transcript redaction is best-effort and does not replace a dedicated secret scanner or human review before export.",
+    "A checksum can be recomputed; only a valid archive signature binds the complete exported chain to its device key, and it does not prove that the signer included every historical event.",
     "GitHub artifact attestation proves repository, workflow, commit, and artifact provenance; the public workflow and test implementation remain inspectable inputs to that trust decision."
   ]
 }

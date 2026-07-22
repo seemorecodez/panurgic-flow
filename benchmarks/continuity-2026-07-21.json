@@ -1,0 +1,37 @@
+{
+  "kind": "panurgic-flow/continuity-benchmark",
+  "schemaVersion": 1,
+  "recordedOn": "2026-07-21",
+  "command": "pnpm benchmark:continuity -- --mode all --runs 3 --lines 5000 --json",
+  "environment": {
+    "node": "v24.18.0",
+    "platform": "win32"
+  },
+  "modes": [
+    {
+      "mode": "hot",
+      "runs": 3,
+      "transcriptLines": 5000,
+      "durationMs": {
+        "median": 42.777,
+        "p95": 44.555,
+        "maximum": 44.555
+      },
+      "maximumHeapDeltaBytes": 6595256,
+      "extractedLines": 400
+    },
+    {
+      "mode": "cold",
+      "runs": 3,
+      "transcriptLines": 5000,
+      "durationMs": {
+        "median": 43.448,
+        "p95": 43.63,
+        "maximum": 43.63
+      },
+      "maximumHeapDeltaBytes": 4450856,
+      "extractedLines": 400
+    }
+  ],
+  "interpretation": "This bounded local baseline records one environment and is not a cross-device performance guarantee."
+}

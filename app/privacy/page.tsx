@@ -10,7 +10,9 @@ export default function PrivacyPage() {
       <h2>Device-local storage</h2>
       <p>Projects, up to ten recent packet versions, and the non-extractable private signing key are stored in your browser&apos;s IndexedDB. Only the public key and signer fingerprint are included in signed exports. If persistent storage is unavailable, the product falls back to temporary session memory and displays a warning.</p>
       <h2>Exports</h2>
-      <p>Files leave the browser only when you explicitly download them. A Codex forge request is intended to be processed in your trusted local Codex environment, outside the hosted site.</p>
+      <p>Files leave the browser only when you explicitly download them. Transcript imports are inspected and redacted locally, and continuity archives are built and verified in the browser. A Codex forge request is intended to be processed in your trusted local Codex environment, outside the hosted site.</p>
+      <h2>Transcript redaction</h2>
+      <p>Before extracted evidence enters the workspace, Panurgic Flow applies best-effort patterns for common credentials, bearer tokens, JWTs, email addresses, URL credentials, secret environment assignments, and home-directory identities. The diagnostic report shows redaction counts without retaining the matched secret values. This is a safety layer, not a complete secret scanner; review imported evidence before exporting it.</p>
       <h2>Delete local data</h2>
       <p>Use Clear local data in the project rail to remove all Panurgic Flow projects, version history, and the device signing identity from the current browser profile. Deleting the signing identity permanently changes the fingerprint used for future packets.</p>
     </PublicPage>

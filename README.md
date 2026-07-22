@@ -19,11 +19,26 @@ The screenshot is a real browser-local signed packet. Tampered signed packets ar
 
 ## Product workflow
 
-1. **Capture:** create a device-local project, paste prefixed repository and agent evidence, and preview recognized or unrecognized lines.
+1. **Capture:** create a device-local project, paste prefixed evidence or import a bounded agent transcript, and review adapter, redaction, recognized-line, and skipped-line diagnostics.
 2. **Review:** build a deterministic packet, inspect its manifest, and trace generated claims to the strongest supplied sources.
 3. **Export:** copy or download artifacts, sign the complete V1 packet with ECDSA P-256, and re-import it to verify both the signature and signer fingerprint.
 
 The hosted product has no account, visitor analytics, API key, or model-generation endpoint. Up to 25 projects and ten recent packet versions per project are stored in IndexedDB on the current device. If persistent browser storage is unavailable, the product falls back to session memory and displays a warning.
+
+## Evidence Continuity 0.3
+
+Evidence Continuity addresses a recurring failure across coding-agent and observability products: histories can disappear, remain trapped in one surface, silently drift as private schemas change, or become expensive to export.
+
+- Local transcript adapters recognize Codex JSONL, Claude Code JSONL, generic agent JSONL, Markdown transcripts, and Panurgic-prefixed text.
+- Imports report adapter confidence, inspected events, extracted evidence, skipped lines, truncation, and redaction counts.
+- Common API keys, bearer tokens, JWTs, email addresses, URL credentials, secret environment assignments, and home-directory identities are redacted before evidence enters the workspace.
+- Project export creates a `panurgic-flow/continuity-bundle` with hash-linked packet versions, a portable head digest, and an ECDSA P-256 signature over the complete archive.
+- Re-import verifies the bundle before restoring it as a separate local project.
+- The dependency-free verifier checks packets or continuity archives without a network connection and can require a valid packet or complete-archive signature.
+
+Use `examples/continuity-transcript.jsonl` for a safe local import walkthrough.
+
+Transcript imports and continuity archives are capped at 4 MB. Adapters produce evidence candidates, not verified facts, and redaction is best-effort rather than a complete secret-scanning guarantee. A checksum detects accidental changes but can be recomputed; a valid archive signature proves that the displayed device key signed the complete hash-linked history. It does not establish human identity or prove that the evidence is true.
 
 ## Architecture
 
@@ -102,10 +117,23 @@ The default output is `outputs/panurgic-codex-packet.json`. The CLI refuses to o
 ## Verification
 
 ```bash
+pnpm panurgic:verify -- packet.json
+pnpm panurgic:verify -- panurgic-flow-continuity.json --require-signature
+pnpm panurgic:verify -- panurgic-flow-continuity.json --json
 pnpm lint
 pnpm test
 pnpm proof:validate
 ```
+
+Run a bounded hot/cold continuity benchmark with machine-readable output:
+
+```bash
+pnpm benchmark:continuity -- --mode all --runs 3 --lines 5000 --json
+```
+
+The checked-in local baseline is [`benchmarks/continuity-2026-07-21.json`](benchmarks/continuity-2026-07-21.json). It records one bounded environment for regression comparison, not a cross-device performance guarantee.
+
+Runs are capped at ten and synthetic input is capped at 10,000 lines. Cold mode starts a fresh Node.js process for each measurement; hot mode reuses the current process.
 
 The suite covers parsing, deterministic generation, V1 validation, legacy migration, canonicalization, checksum/signature separation, valid and adversarial ECDSA verification, non-extractable key persistence, bounded project/version storage, secure CLI behavior, public routes, security headers, accessibility structure, bundle size, and removal of the hosted generation route.
 
@@ -146,11 +174,16 @@ app/                         public product, routes, and error boundaries
 lib/panurgic-contract.mjs    shared V1 contract, migration, checksum, signing, verification
 lib/panurgic-core.mjs        deterministic evidence parser and artifact generator
 lib/panurgic-storage.mjs     bounded IndexedDB storage with memory fallback
+lib/panurgic-transcript.mjs  bounded adapters, diagnostics, and local redaction
+lib/panurgic-continuity.mjs  hash-linked project archive and verification
 scripts/panurgic-forge.mjs   secure local Codex companion
+scripts/panurgic-verify.mjs  network-free packet and continuity verifier
+benchmarks/                  bounded machine-readable regression baselines
 tests/                       domain, storage, route, security, and release checks
 proof/                       machine-readable public release claims
 .github/workflows/           locked verification and GitHub/Sigstore attestation
-docs/submission/             time-bound submission documentation and research
+docs/product/                product and competitor research
+docs/submission/             archived time-bound submission documentation
 ```
 
 ## License

@@ -31,8 +31,10 @@ test("server-renders the production product and public routes", async () => {
   assert.match(html, /<title>Panurgic Flow<\/title>/i);
   assert.match(html, /The signed release-evidence layer for AI-assisted software/i);
   assert.match(html, /Start a local project/i);
-  assert.match(html, /Device-local history/i);
+  assert.match(html, /Portable evidence continuity/i);
   assert.match(html, /Independent packet verification/i);
+  assert.match(html, /Recover and normalize agent evidence/i);
+  assert.match(html, /Import agent transcript/i);
   assert.match(html, /Capture/);
   assert.match(html, /Review/);
   assert.match(html, /Export/);
@@ -97,7 +99,7 @@ test("Codex CLI exposes help, version, validation, and secure dry-run behavior",
   assert.match(help.stdout, /--validate/);
   assert.match(help.stdout, /read-only sandbox/i);
   const version = await execFileAsync(process.execPath, [script, "--version"], { cwd: templatePath });
-  assert.equal(version.stdout.trim(), "0.2.0");
+  assert.equal(version.stdout.trim(), "0.3.0");
   const validate = await execFileAsync(process.execPath, [script, "--validate", example], { cwd: templatePath });
   assert.match(validate.stdout, /forge-request V1 for gpt-5\.6-sol/i);
   const dryRun = await execFileAsync(process.execPath, [script, "--dry-run", example], { cwd: templatePath });
@@ -109,12 +111,15 @@ test("Codex CLI exposes help, version, validation, and secure dry-run behavior",
 });
 
 test("documents and enforces the local-first signed V1 architecture", async () => {
-  const [readme, workspace, contract, storage, forge, worker, privacy, workflow, proof, packageText] = await Promise.all([
+  const [readme, workspace, contract, storage, transcript, continuity, forge, verifier, worker, privacy, workflow, proof, packageText] = await Promise.all([
     readFile(new URL("../README.md", import.meta.url), "utf8"),
     readFile(new URL("../app/_components/panurgic-workspace.tsx", import.meta.url), "utf8"),
     readFile(new URL("../lib/panurgic-contract.mjs", import.meta.url), "utf8"),
     readFile(new URL("../lib/panurgic-storage.mjs", import.meta.url), "utf8"),
+    readFile(new URL("../lib/panurgic-transcript.mjs", import.meta.url), "utf8"),
+    readFile(new URL("../lib/panurgic-continuity.mjs", import.meta.url), "utf8"),
     readFile(new URL("../scripts/panurgic-forge.mjs", import.meta.url), "utf8"),
+    readFile(new URL("../scripts/panurgic-verify.mjs", import.meta.url), "utf8"),
     readFile(new URL("../worker/index.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/privacy/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../.github/workflows/release-trust.yml", import.meta.url), "utf8"),
@@ -135,11 +140,25 @@ test("documents and enforces the local-first signed V1 architecture", async () =
   assert.match(storage, /MAX_VERSIONS_PER_PROJECT = 10/);
   assert.match(storage, /indexedDB\.open/);
   assert.match(storage, /signing-identities/);
+  assert.match(transcript, /MAX_TRANSCRIPT_BYTES = 4 \* 1024 \* 1024/);
+  assert.match(transcript, /claude-code-jsonl/);
+  assert.match(transcript, /codex-jsonl/);
+  assert.match(transcript, /redactTranscriptText/);
+  assert.match(continuity, /panurgic-flow\/continuity-bundle/);
+  assert.match(continuity, /panurgic-flow\/continuity-signature/);
+  assert.match(continuity, /previousEntryDigest/);
+  assert.match(continuity, /signContinuityBundle/);
+  assert.match(continuity, /verifyContinuityBundle/);
+  assert.match(verifier, /--require-signature/);
+  assert.match(verifier, /--json/);
   assert.match(workspace, /file\.size > MAX_PACKET_BYTES/);
   assert.match(workspace, /verifyPacketIntegrity/);
   assert.match(workspace, /Signature valid/);
   assert.match(workspace, /Sign and download packet/);
   assert.match(workspace, /maxLength=\{MAX_RAW_EVIDENCE_LENGTH\}/);
+  assert.match(workspace, /Import agent transcript/);
+  assert.match(workspace, /Export hash-linked history/);
+  assert.match(workspace, /Cryptographically attested continuity/);
   for (const artifactLabel of [
     "Implementation summary",
     "Stakeholder walkthrough",

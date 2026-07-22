@@ -1,0 +1,3 @@
+{"sessionId":"continuity-example","type":"user","message":{"role":"user","content":"Keep the release evidence local under C:\\Users\\sample\\projects and send the final report to owner@example.com."}}
+{"sessionId":"continuity-example","type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"Implemented the Evidence Continuity adapter and hash-linked archive."},{"type":"tool_use","name":"shell_command","input":{"command":"pnpm test"}}]}}
+{"sessionId":"continuity-example","type":"progress","message":{"role":"system","content":"Background progress event intentionally remains outside the evidence candidates."}}

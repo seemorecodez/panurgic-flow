@@ -25,6 +25,15 @@ import type {
   PanurgicPacketV1,
 } from "@/lib/panurgic-contract.mjs";
 import {
+  buildContinuityBundle,
+  isContinuityBundle,
+  MAX_CONTINUITY_BYTES,
+  projectAndVersionsFromContinuityBundle,
+  signContinuityBundle,
+  verifyContinuityBundle,
+} from "@/lib/panurgic-continuity.mjs";
+import type { ContinuityStatus } from "@/lib/panurgic-continuity.mjs";
+import {
   buildBrowserPacket,
   EMPTY_FORM,
   formFromPacket,
@@ -33,6 +42,11 @@ import {
   SAMPLE_FORM,
 } from "@/lib/panurgic-core.mjs";
 import type { FormState } from "@/lib/panurgic-core.mjs";
+import {
+  importTranscriptText,
+  MAX_TRANSCRIPT_BYTES,
+} from "@/lib/panurgic-transcript.mjs";
+import type { TranscriptDiagnostics } from "@/lib/panurgic-transcript.mjs";
 import {
   AUTOSAVE_DELAY_MS,
   clearProjects,
@@ -134,6 +148,17 @@ export function PanurgicWorkspace() {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [confirmClear, setConfirmClear] = useState(false);
   const importInput = useRef<HTMLInputElement>(null);
+  const transcriptInput = useRef<HTMLInputElement>(null);
+  const [transcriptDiagnostics, setTranscriptDiagnostics] = useState<TranscriptDiagnostics | null>(null);
+  const [continuityReport, setContinuityReport] = useState<{
+    status: ContinuityStatus;
+    reason: string;
+    entryCount?: number;
+    attestedEntries?: number;
+    headDigest?: string | null;
+    signerFingerprint?: string;
+    latestPacketAttested?: boolean;
+  } | null>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const projectCreatedAt = useRef<string | null>(null);
 
@@ -228,6 +253,8 @@ export function PanurgicWorkspace() {
     setStage("capture");
     setErrors({});
     setIntegrityStatus("unsigned");
+    setTranscriptDiagnostics(null);
+    setContinuityReport(null);
     setStatusMessage("New local project ready.");
     setConfirmDelete(false);
   }
@@ -242,6 +269,8 @@ export function PanurgicWorkspace() {
     setStage("capture");
     setErrors({});
     setIntegrityStatus("unsigned");
+    setTranscriptDiagnostics(null);
+    setContinuityReport(null);
     setStatusMessage("Sample loaded. Review the parser preview, then build a packet.");
   }
 
@@ -253,10 +282,21 @@ export function PanurgicWorkspace() {
     setStage("capture");
     setErrors({});
     setIntegrityStatus("unsigned");
-    setStatusMessage(`${project.name} opened from this device.`);
+    setTranscriptDiagnostics(null);
+    setContinuityReport(null);
     const result = await listVersions(project.id);
     setStorageMode(result.mode);
     setVersions(result.versions);
+    const latest = result.versions[0];
+    if (latest) {
+      setPacket(latest.packet);
+      const integrity = await verifyPacketIntegrity(latest.packet);
+      setIntegrityStatus(integrity.status);
+      setStage("review");
+      setStatusMessage(`${project.name} opened with its latest packet ready for review.`);
+    } else {
+      setStatusMessage(`${project.name} opened from this device.`);
+    }
   }
 
   function duplicateCurrentProject() {
@@ -295,20 +335,36 @@ export function PanurgicWorkspace() {
   async function exportCurrentProject() {
     if (!currentProjectId || !hasProjectContent(form)) return;
     const versionResult = await listVersions(currentProjectId);
-    const project = projects.find((entry) => entry.id === currentProjectId) ?? {
+    if (!versionResult.versions.length) {
+      setStatusMessage("Build at least one packet version before exporting continuity.");
+      return;
+    }
+    const existingProject = projects.find((entry) => entry.id === currentProjectId);
+    const now = new Date().toISOString();
+    const project = {
       id: currentProjectId,
       name: form.projectName || "Untitled project",
       form,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      createdAt: existingProject?.createdAt ?? projectCreatedAt.current ?? now,
+      updatedAt: now,
     };
-    downloadJson("panurgic-flow-project.json", {
-      kind: "panurgic-flow/project-export",
-      schemaVersion: 1,
-      project,
-      versions: versionResult.versions,
-    });
-    setStatusMessage("Project history exported as JSON.");
+    try {
+      const unsigned = await buildContinuityBundle(project, versionResult.versions);
+      const signing = await getOrCreateSigningIdentity();
+      setStorageMode(signing.mode);
+      const bundle = await signContinuityBundle(unsigned, signing.identity);
+      const verification = await verifyContinuityBundle(bundle);
+      if (verification.status !== "attested") {
+        throw new Error("The continuity archive signature did not pass independent verification.");
+      }
+      setContinuityReport(verification);
+      downloadJson("panurgic-flow-continuity.json", bundle);
+      setStatusMessage(
+        `Signed continuity archive exported with ${verification.entryCount ?? 0} hash-linked packet version${verification.entryCount === 1 ? "" : "s"}.`,
+      );
+    } catch (error) {
+      setStatusMessage(error instanceof Error ? error.message : "The continuity bundle could not be exported.");
+    }
   }
 
   function normalizeCurrentEvidence() {
@@ -377,16 +433,99 @@ export function PanurgicWorkspace() {
     setStatusMessage("Codex request downloaded for trusted local synthesis.");
   }
 
+  async function importTranscript(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+    if (file.size > MAX_TRANSCRIPT_BYTES) {
+      setStatusMessage("That transcript is larger than the 4 MB local import limit.");
+      return;
+    }
+    try {
+      const imported = importTranscriptText(await file.text(), { fileName: file.name });
+      setTranscriptDiagnostics(imported.diagnostics);
+      setContinuityReport(null);
+      if (!imported.evidenceText) {
+        setStatusMessage(imported.diagnostics.warnings.at(-1) ?? "No evidence candidates were imported.");
+        return;
+      }
+      ensureProjectId();
+      const baseName = file.name.replace(/\.[^.]+$/u, "").slice(0, MAX_PROJECT_NAME_LENGTH);
+      setForm((current) => {
+        const separator = current.rawEvidence.trim() ? "\n" : "";
+        const combined = `${current.rawEvidence.trim()}${separator}${imported.evidenceText}`;
+        return {
+          ...current,
+          projectName: current.projectName || baseName || "Imported agent transcript",
+          agentMix: imported.suggestedAgentMix,
+          rawEvidence: combined.slice(0, MAX_RAW_EVIDENCE_LENGTH),
+        };
+      });
+      setPacket(null);
+      setIntegrityStatus("unsigned");
+      setSaveStatus("Changes pending");
+      const redactionCount = imported.diagnostics.redactions.reduce((sum, item) => sum + item.count, 0);
+      setStatusMessage(
+        `${imported.diagnostics.extractedLines} evidence candidate${imported.diagnostics.extractedLines === 1 ? "" : "s"} imported locally with ${redactionCount} sensitive value${redactionCount === 1 ? "" : "s"} redacted.`,
+      );
+    } catch (error) {
+      setStatusMessage(error instanceof Error ? error.message : "The transcript could not be imported.");
+    }
+  }
+
   async function importPacket(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     event.target.value = "";
     if (!file) return;
-    if (file.size > MAX_PACKET_BYTES) {
-      setStatusMessage("That packet is larger than the 512 KB import limit.");
+    if (file.size > MAX_CONTINUITY_BYTES) {
+      setStatusMessage("That file is larger than the 4 MB continuity import limit.");
       return;
     }
     try {
       const value = JSON.parse(await file.text());
+      if (isContinuityBundle(value)) {
+        const continuity = await verifyContinuityBundle(value);
+        if (continuity.status === "modified") throw new Error(continuity.reason);
+        const restored = projectAndVersionsFromContinuityBundle(value);
+        const projectId = newId("project");
+        const latest = restored.versions.at(-1)?.packet ?? null;
+        const restoredForm = latest ? formFromPacket(latest) : restored.project.form;
+        const now = new Date().toISOString();
+        setCurrentProjectId(projectId);
+        projectCreatedAt.current = restored.project.createdAt;
+        setForm(restoredForm);
+        setPacket(latest);
+        setStage(latest ? "review" : "capture");
+        setTranscriptDiagnostics(null);
+        setContinuityReport(continuity);
+        await saveProject({
+          id: projectId,
+          name: restoredForm.projectName || restored.project.name,
+          form: restoredForm,
+          createdAt: restored.project.createdAt,
+          updatedAt: now,
+        });
+        for (const version of restored.versions) {
+          await saveVersion({
+            ...version,
+            id: newId("version"),
+            projectId,
+          });
+        }
+        if (latest) {
+          const integrity = await verifyPacketIntegrity(latest);
+          setIntegrityStatus(integrity.status);
+        } else {
+          setIntegrityStatus("unsigned");
+        }
+        await refreshProjects(projectId);
+        setStatusMessage(continuity.reason);
+        window.setTimeout(() => headingRef.current?.focus(), 0);
+        return;
+      }
+      if (file.size > MAX_PACKET_BYTES) {
+        throw new Error("A single packet is larger than the 512 KB import limit.");
+      }
       const { packet: imported, migrated } = normalizePacket(value);
       const integrity = await verifyPacketIntegrity(imported);
       const projectId = newId("project");
@@ -394,6 +533,8 @@ export function PanurgicWorkspace() {
       projectCreatedAt.current = imported.createdAt;
       setForm(formFromPacket(imported));
       setPacket(imported);
+      setTranscriptDiagnostics(null);
+      setContinuityReport(null);
       setIntegrityStatus(integrity.status);
       setStage("review");
       await saveProject({
@@ -511,9 +652,9 @@ export function PanurgicWorkspace() {
             <p className="eyebrow">Signed release evidence</p>
             <h1>The signed release-evidence layer for AI-assisted software.</h1>
             <p className="hero-lede">
-              Turn completed multi-agent build records into source-linked claims,
-              four reusable delivery artifacts, and cryptographically verifiable
-              release packets without uploading project data.
+              Recover agent transcripts locally, turn completed build records into
+              source-linked claims, and preserve cryptographically verifiable release
+              continuity without uploading project data.
             </p>
             <div className="hero-actions">
               <a className="primary-action" href="#workspace">Start a local project</a>
@@ -524,14 +665,14 @@ export function PanurgicWorkspace() {
             <ul className="trust-list" aria-label="Product assurances">
               <li>No account</li>
               <li>No hosted model endpoint</li>
-              <li>Device-local history</li>
+              <li>Portable evidence continuity</li>
               <li>Independent packet verification</li>
             </ul>
           </div>
 
           <div className="terminal-card" aria-label="Panurgic Flow product sequence">
             <div className="terminal-bar"><span /><span /><span /><small>panurgic-flow.run</small></div>
-            <div className="flow-step"><small>01 · Capture</small><strong>Normalize multi-agent evidence</strong></div>
+            <div className="flow-step"><small>01 · Capture</small><strong>Recover and normalize agent evidence</strong></div>
             <div className="flow-step"><small>02 · Review</small><strong>Trace claims to supplied sources</strong></div>
             <div className="flow-step"><small>03 · Export</small><strong>Sign and verify portable packets</strong></div>
           </div>
@@ -579,7 +720,7 @@ export function PanurgicWorkspace() {
           {currentProjectId && (
             <div className="project-tools">
               <button type="button" onClick={duplicateCurrentProject}>Duplicate</button>
-              <button type="button" onClick={exportCurrentProject}>Export project</button>
+              <button type="button" onClick={exportCurrentProject}>Export continuity</button>
               {confirmDelete ? (
                 <div className="confirm-row">
                   <button className="danger" type="button" onClick={removeCurrentProject}>Confirm delete</button>
@@ -631,6 +772,37 @@ export function PanurgicWorkspace() {
                   <div><p className="eyebrow">Capture</p><h2 id="capture-heading">Build the evidence envelope.</h2></div>
                   <p>Local by default: nothing is uploaded unless you explicitly export it.</p>
                 </div>
+                <div className="continuity-intake">
+                  <div>
+                    <p className="eyebrow">Evidence continuity</p>
+                    <h3>Recover useful evidence from agent transcripts.</h3>
+                    <p>Import JSONL, Markdown, or prefixed text locally. Secrets and home paths are redacted before evidence enters the workspace.</p>
+                  </div>
+                  <button type="button" onClick={() => transcriptInput.current?.click()}>Import agent transcript</button>
+                  <input
+                    ref={transcriptInput}
+                    className="sr-only"
+                    type="file"
+                    accept=".jsonl,.json,.md,.markdown,.txt,application/json,text/plain,text/markdown"
+                    aria-label="Import an agent transcript"
+                    onChange={importTranscript}
+                  />
+                </div>
+                {transcriptDiagnostics && (
+                  <div className="import-diagnostics" role="status" aria-label="Transcript import diagnostics">
+                    <div><strong>{transcriptDiagnostics.adapterLabel}</strong><span>{transcriptDiagnostics.confidence} confidence</span></div>
+                    <dl>
+                      <div><dt>Events inspected</dt><dd>{transcriptDiagnostics.parsedEvents}</dd></div>
+                      <div><dt>Evidence extracted</dt><dd>{transcriptDiagnostics.extractedLines}</dd></div>
+                      <div><dt>Lines skipped</dt><dd>{transcriptDiagnostics.skippedLines}</dd></div>
+                      <div><dt>Redactions</dt><dd>{transcriptDiagnostics.redactions.reduce((sum, item) => sum + item.count, 0)}</dd></div>
+                    </dl>
+                    {transcriptDiagnostics.redactions.length > 0 && (
+                      <p>Protected: {transcriptDiagnostics.redactions.map((item) => `${item.count} ${item.kind}`).join(", ")}.</p>
+                    )}
+                    {transcriptDiagnostics.warnings.length > 0 && <ul>{transcriptDiagnostics.warnings.map((warning) => <li key={warning}>{warning}</li>)}</ul>}
+                  </div>
+                )}
                 <div className="field-grid">
                   <label>
                     Project name
@@ -700,8 +872,8 @@ export function PanurgicWorkspace() {
                   <p>Download a bounded request, run it in your authenticated read-only Codex environment, then import the V1 result.</p>
                   <div className="bridge-actions">
                     <button type="button" onClick={downloadCodexRequest}>Download Codex request</button>
-                    <button type="button" onClick={() => importInput.current?.click()}>Import packet</button>
-                    <input ref={importInput} className="sr-only" type="file" accept="application/json,.json" aria-label="Import Panurgic Flow packet" onChange={importPacket} />
+                    <button type="button" onClick={() => importInput.current?.click()}>Import packet or continuity</button>
+                    <input ref={importInput} className="sr-only" type="file" accept="application/json,.json" aria-label="Import a Panurgic Flow packet or continuity bundle" onChange={importPacket} />
                   </div>
                 </div>
                 <button className="generate-button" type="submit">Build evidence packet</button>
@@ -794,8 +966,20 @@ export function PanurgicWorkspace() {
               </div>
               {versions.length > 0 && (
                 <div className="version-history">
-                  <div><p className="eyebrow">Local history</p><h3>Saved packet versions</h3></div>
+                  <div>
+                    <p className="eyebrow">Evidence continuity</p>
+                    <h3>Saved packet versions</h3>
+                    <button type="button" onClick={exportCurrentProject}>Export hash-linked history</button>
+                  </div>
                   <div>{versions.map((version) => <button type="button" key={version.id} onClick={() => openVersion(version)}>{formatTimestamp(version.createdAt)}<span>{version.packet.attestation ? "signed" : version.packet.integrity ? "checksum" : "draft"}</span></button>)}</div>
+                </div>
+              )}
+              {continuityReport && (
+                <div className={`continuity-report ${continuityReport.status}`} role="status">
+                  <strong>{continuityReport.status === "attested" ? "Cryptographically attested continuity" : continuityReport.status === "checksum" ? "Hash-linked continuity" : "Continuity archive"}</strong>
+                  <p>{continuityReport.reason}</p>
+                  {continuityReport.signerFingerprint && <><span>Archive signer fingerprint</span><code>{continuityReport.signerFingerprint}</code></>}
+                  {continuityReport.headDigest && <code>{continuityReport.headDigest}</code>}
                 </div>
               )}
             </section>

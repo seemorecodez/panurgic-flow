@@ -11,7 +11,7 @@ import {
 import { buildBrowserPacket } from "../lib/panurgic-core.mjs";
 
 const MODEL = "gpt-5.6-sol";
-const CLI_VERSION = "0.2.0";
+const CLI_VERSION = "0.3.0";
 const DEFAULT_INPUT = "examples/forge-input.json";
 const DEFAULT_OUTPUT = "outputs/panurgic-codex-packet.json";
 const MAX_REQUEST_BYTES = 128 * 1024;
